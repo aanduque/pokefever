@@ -3,17 +3,18 @@
 
 	<description>Apply WordPress Coding Standards to Understrap</description>
 
-	<!-- Whenever possible, cache the scan results and re-use those for unchanged files on the next scan. -->
-	<arg name="cache" value=".phpcs-cache"/>
+	<!-- Whenever possible, cache the scan results and re-use those for unchanged files on the next
+	scan. -->
+	<arg name="cache" value=".phpcs-cache" />
 
 	<!-- Strip the filepaths down to the relevant bit. -->
-	<arg name="basepath" value="./"/>
+	<arg name="basepath" value="./" />
 
 	<!-- Show colors in console -->
-	<arg name="colors"/>
+	<arg name="colors" />
 
 	<!-- Show sniff codes in all reports -->
-	<arg value="s"/>
+	<arg value="s" />
 
 	<!-- Scan these files -->
 	<file>.</file>
@@ -42,8 +43,8 @@
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
-				<element value="understrap"/>
-				<element value="woocommerce"/>
+				<element value="understrap" />
+				<element value="woocommerce" />
 			</property>
 		</properties>
 	</rule>
@@ -54,7 +55,7 @@
 	-->
 	<rule ref="WordPress.Files.FileName">
 		<properties>
-			<property name="is_theme" value="true"/>
+			<property name="is_theme" value="true" />
 		</properties>
 	</rule>
 
@@ -72,11 +73,11 @@
 		<!-- Exclude functions which are escaped in inc/extras.php -->
 		<properties>
 			<property name="customAutoEscapedFunctions" type="array">
-				<element value="get_the_title"/>
-				<element value="get_the_archive_title"/>
-				<element value="get_the_archive_description"/>
-				<element value="understrap_get_list_item_separator"/>
-				<element value="understrap_get_screen_reader_class"/>
+				<element value="get_the_title" />
+				<element value="get_the_archive_title" />
+				<element value="get_the_archive_description" />
+				<element value="understrap_get_list_item_separator" />
+				<element value="understrap_get_screen_reader_class" />
 			</property>
 		</properties>
 	</rule>
@@ -86,11 +87,17 @@
 		when running phpcbf.
 	-->
 	<rule ref="Generic.Files.LineEndings">
-		<exclude phpcs-only="true" name="Generic.Files.LineEndings"/>
+		<exclude phpcs-only="true" name="Generic.Files.LineEndings" />
 	</rule>
 
 	<!-- Use the WPThemeReview Ruleset -->
 	<rule ref="WPThemeReview" />
+
+	<rule name="WordPress.NamingConventions.ValidFunctionName">
+		<properties>
+			<property name="exclude" type="array" value="Pokefever" />
+		</properties>
+	</rule>
 
 	<!--
 		Exclude checking for shortened URLs in Bootstrap's js. files.
