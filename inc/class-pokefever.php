@@ -7,6 +7,23 @@ final class Pokerfever {
 	public static function init() {
 		self::register_post_types();
 
+		// add_action( 'wp_enqueue_scripts', array( self::class, 'enqueue_scripts' ) );
+
+		add_action(
+			'wp_footer',
+			function() {
+				global $wp_query;
+
+				$post_id = $wp_query->get_queried_object_id();
+
+				if ( $post_id ) {
+					$primary_color = get_post_meta( $post_id, 'pokemon_color_1', true );
+					self::override_primary_color( $primary_color );
+				}
+				die;
+			}
+		);
+
 		add_action( 'add_meta_boxes', array( self::class, 'pokefever_add_pokemon_meta_box' ) );
 
 		add_action( 'save_post', array( self::class, 'pokefever_save_pokemon_meta_box_data' ) );
@@ -18,6 +35,51 @@ final class Pokerfever {
 		add_action( 'wp_ajax_nopriv_load_oldest_pokedex_number', array( self::class, 'load_oldest_pokedex_number_callback' ) );
 
 		do_action( 'pokefever_loaded' );
+	}
+
+	public static function hex_to_rgb( $hex ) {
+		list($r, $g, $b) = sscanf( $hex, '#%02x%02x%02x' );
+		return (object) array(
+			'red'   => $r,
+			'green' => $g,
+			'blue'  => $b,
+		);
+	}
+
+	public static function override_primary_color( $primary = '#e74c3c' ) {
+		$rgb = self::hex_to_rgb( $primary );
+
+		$bg_image = get_stylesheet_directory_uri() . '/img/bg-pokeball.png';
+
+					echo "<style>:root {
+					--bs-primary: $primary;
+					--bs-link-color: $primary;
+					--bs-primary-rgb: $rgb->red,$rgb->green,$rgb->blue;
+				}
+				
+					body {
+						height: 100vh;
+						position: relative;
+						background: rgb(var(--bs-primary-rgb));
+						background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(var(--bs-primary-rgb),1) 100%);
+					}
+
+					body::before {
+						content: \" \";
+						display: block;
+						content: \" \";
+						position: absolute;
+						background-image: url(\"$bg_image\");
+						background-repeat: no-repeat;
+						background-position: top right;
+						opacity: 0.08;
+						top: 0;
+						bottom: 0;
+						right: 0;
+						left: 0;
+					}
+				</style>";
+				// );
 	}
 
 	public static function load_oldest_pokedex_number_callback() {

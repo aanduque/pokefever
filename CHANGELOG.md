@@ -14,3 +14,6 @@ bin/install-wp-tests.sh wp_tests root root "localhost:/Users/annduque/Library/Ap
 Fontes:
 - <https://textcraft.net/style/Textcraft/pokemon>
 - <https://flatuicolors.com/palette/defo> Alizarin Red
+- <https://www.figma.com/community/file/1044316192441037087>
+- <https://www.figma.com/file/hBymWQkHSv9NLKEMuN6Jye/Untitled?type=design&node-id=6%3A5&t=4ShQHcy9Ay3p72cP-1> Base Figma Template
+- <https://packagist.org/packages/league/color-extractor> Color Extractor

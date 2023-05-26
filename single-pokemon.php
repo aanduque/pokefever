@@ -1,76 +1,83 @@
 <?php get_header(); ?>
 
-<div class="container">
+<div class="container" id="pokemon">
 	<?php
 	while ( have_posts() ) :
 		the_post();
 		?>
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-6 order-md-2">
 				<!-- Display the featured image (Photo of the Pokémon) -->
 				<?php if ( has_post_thumbnail() ) : ?>
-					<img src="<?php the_post_thumbnail_url(); ?>" class="img-fluid">
+					<style>
+						.pokemon-image {
+							position: relative;
+							text-align: center;
+						}
+
+						.pokemon-image::after {
+							width: 60%;
+							margin: -80px auto 20px auto;
+							opacity: 0.5;
+							display: block;
+							height: 60px;
+							border-radius: 100%;
+							background-color: #000;
+							content: " ";
+							z-index: 0;
+						}
+
+						.pokemon-image img {
+							position: relative;
+							z-index: 1;
+						}
+					</style>
+					<div class="pokemon-image">
+						<img src="<?php the_post_thumbnail_url(); ?>" class="img-fluid">
+					</div>
 				<?php endif; ?>
 
-				<!-- Pokémon name (post title) -->
-				<h1><?php the_title(); ?></h1>
+			</div>
 
-				<!-- Pokémon description (post content) -->
-				<div><?php the_content(); ?></div>
+			<div class="col-md-6 d-flex flex-column justify-content-center">
+
+				<!-- Pokémon name (post title) -->
+				<h1>
+					<?php the_title(); ?>
+					<?php if ( $pokedex_number = get_post_meta( get_the_ID(), 'pokedex_new', true ) ) : ?>
+						<small class="text-body-secondary text-muted">#<?php echo esc_html( str_pad( $pokedex_number, 3, '0', STR_PAD_LEFT ) ); ?></small>
+					<?php endif; ?>
+				</h1>
 
 				<!-- Pokémon types (primary and secondary) -->
 				<?php
 				$types = get_the_terms( get_the_ID(), 'pokemon_type' );
 				if ( $types ) :
 					?>
-					<div>
-						<h5>Types</h5>
-						<ul>
+						<div>
 							<?php
 							foreach ( $types as $type ) :
 								?>
-								<li><?php echo esc_html( $type->name ); ?></li>
+								<span class="badge badge-lg rounded-pill text-bg-info"><?php echo esc_html( $type->name ); ?></span>
 							<?php endforeach; ?>
-						</ul>
-					</div>
+						</div>
 				<?php endif; ?>
-			</div>
 
-			<div class="col-md-6">
-				<!-- Pokedex number in the most recent version of the game -->
-				<?php if ( $pokedex_number = get_post_meta( get_the_ID(), 'pokedex_number', true ) ) : ?>
-					<div>
-						<h5>Pokedex Number (Most Recent)</h5>
-						<p><?php echo esc_html( $pokedex_number ); ?></p>
+				<!-- Pokémon description (post content) -->
+				<div><?php the_content(); ?></div>
+
+				<div class="card">
+					<div class="card-body">
+					<h5 class="card-title">Card title</h5>
+					<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+					<a href="#" class="btn btn-primary">Go somewhere</a>
 					</div>
-				<?php endif; ?>
+				</div>
 
 				<!-- Button to load the Pokedex number in the oldest version of the game -->
-				<button id="load-oldest-pokedex-number" class="btn btn-primary">Load Oldest Pokedex Number</button>
-				<div id="oldest-pokedex-number"></div>
+				<!-- <button id="load-oldest-pokedex-number" class="btn btn-primary">Load Oldest Pokedex Number</button>
+				<div id="oldest-pokedex-number"></div> -->
 
-				<!-- Pokémon attacks -->
-				<?php if ( $attacks = get_post_meta( get_the_ID(), 'attacks', true ) ) : ?>
-					<div>
-						<h5>Attacks</h5>
-						<table class="table">
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Description</th>
-								</tr>
-							</thead>
-							<tbody>
-								<?php foreach ( $attacks as $attack ) : ?>
-									<tr>
-										<td><?php echo esc_html( $attack['name'] ); ?></td>
-										<td><?php echo esc_html( $attack['description'] ); ?></td>
-									</tr>
-								<?php endforeach; ?>
-							</tbody>
-						</table>
-					</div>
-				<?php endif; ?>
 			</div>
 		</div>
 	<?php endwhile; ?>
