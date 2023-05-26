@@ -16,4 +16,13 @@ Fontes:
 - <https://flatuicolors.com/palette/defo> Alizarin Red
 - <https://www.figma.com/community/file/1044316192441037087>
 - <https://www.figma.com/file/hBymWQkHSv9NLKEMuN6Jye/Untitled?type=design&node-id=6%3A5&t=4ShQHcy9Ay3p72cP-1> Base Figma Template
-- <https://packagist.org/packages/league/color-extractor> Color Extractor
+- Inspiration: <https://i.pinimg.com/originals/46/c6/69/46c6696c0e9dd722ef29baaf0ec621f1.png>
+- <https://packagist.org/packages/league/color-extractor> Color Extractor Library
+- Bootstrap Docs:
+  - Columns: <https://getbootstrap.com/docs/5.3/layout/columns/>
+
+
+- Loom Sessions
+- Initial Layout <https://www.loom.com/share/ee03ab4a46b4492694c1501a81d9e64b>
+- Implementing /generate <https://www.loom.com/share/f08fc521533a499981477d924f47a9f3>
+- Implementing /random <https://www.loom.com/share/4ffb639a8fda415dbd2682314311e2dd>

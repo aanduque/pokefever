@@ -21,8 +21,12 @@ final class Pokerfever {
 				$post_id = $wp_query->get_queried_object_id();
 
 				if ( $post_id ) {
-					$primary_color = get_post_meta( $post_id, 'pokemon_primary_color', true );
-					self::override_primary_color( $primary_color );
+					$primary_color   = get_post_meta( $post_id, 'pokemon_primary_color', true );
+					$secondary_color = get_post_meta( $post_id, 'pokemon_secondary_color', true );
+
+					if ( $primary_color ) {
+						self::override_primary_color( $primary_color, $secondary_color ? $secondary_color : '#fff' );
+					}
 				}
 				die;
 			}
@@ -38,7 +42,8 @@ final class Pokerfever {
 				}
 
 				if ( $wp_query->get( 'name' ) === 'random' ) {
-					wp_die( 'Not implemented yet.' );
+					self::random_pokemon();
+					die;
 				}
 			}
 		);
@@ -54,6 +59,22 @@ final class Pokerfever {
 		add_action( 'wp_ajax_nopriv_load_oldest_pokedex_number', array( self::class, 'load_oldest_pokedex_number_callback' ) );
 
 		do_action( 'pokefever_loaded' );
+	}
+
+	protected static function random_pokemon() {
+
+		// Get a random pokemon from the database.
+		$pokemon = get_posts(
+			array(
+				'post_type'      => 'pokemon',
+				'posts_per_page' => 1,
+				'orderby'        => 'rand',
+			)
+		);
+
+		// Redirect to the pokemon's page.
+		wp_safe_redirect( get_permalink( $pokemon[0]->ID ) );
+		exit;
 	}
 
 	public static function generate_pokemon() {
@@ -147,7 +168,10 @@ final class Pokerfever {
 	protected static function extract_colors_from_image( $image_url ) {
 		$colors = array();
 
-		$palette = Palette::fromFilename( $image_url );
+		// TODO: this needs to be taken care of.
+		set_error_handler( function() {} );
+
+		$palette = Palette::fromFilename( $image_url, Color::fromHexToInt( '#FFFFFF' ) );
 
 		// An extractor is built from a palette.
 		$extractor = new ColorExtractor( $palette );
@@ -165,6 +189,8 @@ final class Pokerfever {
 				return array( $keys[ $index ] => Color::fromIntToHex( $color ) );
 			}
 		)->toArray();
+
+		restore_error_handler();
 	}
 
 	/**
@@ -251,26 +277,34 @@ final class Pokerfever {
 		return (object) array(
 			'red'   => $r,
 			'green' => $g,
-			'blue'  => $b,
+			'blue'  => $b ?? 0,
 		);
 	}
 
-	public static function override_primary_color( $primary = '#e74c3c' ) {
-		$rgb = self::hex_to_rgb( $primary );
+	public static function override_primary_color( $primary = '#e74c3c', $secondary = '#c0392b' ) {
+		$primary_rgb   = self::hex_to_rgb( $primary );
+		$secondary_rgb = self::hex_to_rgb( $secondary );
 
 		$bg_image = get_stylesheet_directory_uri() . '/img/bg-pokeball.png';
 
 					echo "<style>:root {
 					--bs-primary: $primary;
+					--bs-secondary: $secondary;
+					--bs-primary-rgb: $primary_rgb->red,$primary_rgb->green,$primary_rgb->blue;
+					--bs-secondary-rgb: $secondary_rgb->red,$secondary_rgb->green,$secondary_rgb->blue;
 					--bs-link-color: $primary;
-					--bs-primary-rgb: $rgb->red,$rgb->green,$rgb->blue;
 				}
+
+					.site {
+						min-height: 100vh;
+						display: flex;
+						flex-direction: column;
+					}
 				
 					body {
 						height: 100vh;
 						position: relative;
-						background: rgb(var(--bs-primary-rgb));
-						background: linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(var(--bs-primary-rgb),1) 100%);
+						background: linear-gradient(0deg, rgba(var(--bs-secondary-rgb),0.75) 0%, rgba(var(--bs-primary-rgb),1) 90%);
 					}
 
 					body::before {
