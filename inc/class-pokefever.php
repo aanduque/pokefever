@@ -2,6 +2,10 @@
 
 namespace Pokerfever;
 
+use League\ColorExtractor\ColorExtractor;
+use League\ColorExtractor\Palette;
+use League\ColorExtractor\Color;
+
 final class Pokerfever {
 
 	public static function init() {
@@ -17,14 +21,29 @@ final class Pokerfever {
 				$post_id = $wp_query->get_queried_object_id();
 
 				if ( $post_id ) {
-					$primary_color = get_post_meta( $post_id, 'pokemon_color_1', true );
+					$primary_color = get_post_meta( $post_id, 'pokemon_primary_color', true );
 					self::override_primary_color( $primary_color );
 				}
 				die;
 			}
 		);
 
-		add_action( 'add_meta_boxes', array( self::class, 'pokefever_add_pokemon_meta_box' ) );
+		add_action(
+			'template_redirect',
+			function() {
+				global $wp_query;
+				if ( $wp_query->get( 'name' ) === 'generate' ) {
+					self::generate_pokemon();
+					die;
+				}
+
+				if ( $wp_query->get( 'name' ) === 'random' ) {
+					wp_die( 'Not implemented yet.' );
+				}
+			}
+		);
+
+		// add_action( 'add_meta_boxes', array( self::class, 'pokefever_add_pokemon_meta_box' ) );
 
 		add_action( 'save_post', array( self::class, 'pokefever_save_pokemon_meta_box_data' ) );
 
@@ -35,6 +54,196 @@ final class Pokerfever {
 		add_action( 'wp_ajax_nopriv_load_oldest_pokedex_number', array( self::class, 'load_oldest_pokedex_number_callback' ) );
 
 		do_action( 'pokefever_loaded' );
+	}
+
+	public static function generate_pokemon() {
+		global $wpdb;
+
+		$saved_api_ids = wp_cache_get( 'saved_api_ids', 'pokefever' );
+
+		if ( ! is_array( $saved_api_ids ) ) {
+			var_dump( 'value is not cached' );
+
+			// Compile a list of the existing pokemon on our local database.
+			$saved_api_ids = $wpdb->get_col( "SELECT meta_value from {$wpdb->prefix}postmeta WHERE meta_key = 'pokemon_api_id'" );
+
+			wp_cache_set( 'saved_api_ids', $saved_api_ids, 'pokefever', 5 * MINUTE_IN_SECONDS );
+		}
+
+		// Need a way of grabbing and save the total number of pokemon available on the API.
+		$total_pokemon = 1010; // TODO: grab this value from the api and save it to a transient.
+
+		// Need to generate a random number between 1 and the total number of pokemon available on the API - excluding the ones we already have.
+		$range = range( 1, $total_pokemon );
+
+		// Remove the numbers we already have from the range.
+		$available_api_ids = array_diff( $range, $saved_api_ids );
+
+		// Grab a random number from the available numbers.
+		$random_number = array_rand( $available_api_ids );
+
+		$results = wp_remote_get( "https://pokeapi.co/api/v2/pokemon-species/{$available_api_ids[ $random_number ]}" );
+
+		if ( is_wp_error( $results ) ) {
+			// translators: %s is the error message.
+			wp_die( sprintf( esc_html_e( 'Something went wrong: %s', 'pokefever' ), $results->get_error_message() ) );
+		}
+
+		$body = wp_remote_retrieve_body( $results );
+
+		$data = json_decode( $body );
+
+		$pokemon_data = self::get_pokemon_data_from_api( $data );
+
+		$pokemon = array(
+			'post_title'   => ucfirst( $data->name ),
+			'post_name'    => strtolower( $data->name ),
+			'post_content' => self::get_english_description( $data->flavor_text_entries ),
+			'post_status'  => 'publish',
+			'post_type'    => 'pokemon',
+			'meta_input'   => array(
+				'pokemon_api_id' => $data->id,
+				'pokemon_weight' => absint( $pokemon_data->weight ) / 10,
+			),
+		);
+
+		$pokemon_post = wp_insert_post( $pokemon );
+
+		if ( is_wp_error( $pokemon_post ) ) {
+			wp_die( $pokemon_post->get_error_message() );
+		}
+
+		// Set the featured image.
+		$image_url = $pokemon_data->sprites->other->{'official-artwork'}->front_default ?? null;
+
+		if ( $image_url ) {
+			$attachment_id = self::set_post_thumbnail_from_image_url( $image_url, $pokemon_post, $data->name );
+
+			if ( ! is_wp_error( $attachment_id ) ) {
+				$image_path = get_attached_file( $attachment_id );
+
+				if ( $image_path ) {
+
+					// Set the primary and secondary colors.
+					$colors = self::extract_colors_from_image( $image_path );
+
+					collect( $colors )->each(
+						function( $color, $index ) use ( $pokemon_post ) {
+							update_post_meta( $pokemon_post, "pokemon_{$index}_color", $color );
+						}
+					);
+				}
+			}
+		}
+
+		wp_safe_redirect( get_permalink( $pokemon_post ) );
+
+		exit;
+
+		// Send a call to the pokemon api to get the data for the pokemon with the number we generated.
+		// Save the data to our local database.
+	}
+
+	protected static function extract_colors_from_image( $image_url ) {
+		$colors = array();
+
+		$palette = Palette::fromFilename( $image_url );
+
+		// An extractor is built from a palette.
+		$extractor = new ColorExtractor( $palette );
+
+		// it defines an extract method which return the most “representative” colors.
+		$colors = $extractor->extract( 2 );
+
+		$keys = array(
+			'primary',
+			'secondary',
+		);
+
+		return collect( $colors )->mapWithKeys(
+			function( $color, $index ) use ( $keys ) {
+				return array( $keys[ $index ] => Color::fromIntToHex( $color ) );
+			}
+		)->toArray();
+	}
+
+	/**
+	 * Downloads an image from the specified URL and attaches it to a post as a post thumbnail.
+	 *
+	 * @param string $image_url    The URL of the image to download.
+	 * @param int    $post_id The post ID the post thumbnail is to be associated with.
+	 * @param string $desc    Optional. Description of the image.
+	 * @return string|WP_Error Attachment ID, WP_Error object otherwise.
+	 */
+	public static function set_post_thumbnail_from_image_url( $image_url, $post_id, $desc ) {
+		// Set variables for storage, fix file filename for query strings.
+		preg_match( '/[^\?]+\.(jpe?g|jpe|gif|png)\b/i', $image_url, $matches );
+		if ( ! $matches ) {
+			 return new WP_Error( 'image_sideload_failed', __( 'Invalid image URL' ) );
+		}
+
+		require_once ABSPATH . '/wp-admin/includes/file.php';
+		require_once ABSPATH . '/wp-admin/includes/media.php';
+		require_once ABSPATH . '/wp-admin/includes/image.php';
+
+		$file_array         = array();
+		$file_array['name'] = basename( $matches[0] );
+
+		// Download file to temp location.
+		$file_array['tmp_name'] = download_url( $image_url );
+
+		// If error storing temporarily, return the error.
+		if ( is_wp_error( $file_array['tmp_name'] ) ) {
+			return $file_array['tmp_name'];
+		}
+
+		// Do the validation and storage stuff.
+		$id = media_handle_sideload( $file_array, $post_id, $desc );
+
+		// If error storing permanently, unlink.
+		if ( is_wp_error( $id ) ) {
+			@unlink( $file_array['tmp_name'] );
+			return $id;
+		}
+
+		set_post_thumbnail( $post_id, $id );
+
+		return $id;
+	}
+
+	public static function get_pokemon_data_from_api( $pokemon_species_response ) {
+		$endpoint = collect( $pokemon_species_response->varieties )->filter(
+			function( $varietty ) {
+				return $varietty->is_default;
+			}
+		)->first()->pokemon->url ?? null; // TODO: fix the min php version checked by the WPCS.
+
+		if ( ! $endpoint ) {
+			return null;
+		}
+
+		$results = wp_remote_get( $endpoint );
+
+		if ( is_wp_error( $results ) ) {
+			// translators: %s is the error message.
+			wp_die( sprintf( esc_html_e( 'Something went wrong: %s', 'pokefever' ), $results->get_error_message() ) );
+		}
+
+		$body = wp_remote_retrieve_body( $results );
+
+		$data = json_decode( $body );
+
+		return $data;
+	}
+
+	public static function get_english_description( $available_descriptions ) {
+		$english_description = collect( $available_descriptions )->filter(
+			function( $description ) {
+				return 'en' === $description->language->name;
+			}
+		)->first()->flavor_text ?? __( 'No description available.', 'pokefever' );
+
+		return str_replace( "\n", ' ', $english_description );
 	}
 
 	public static function hex_to_rgb( $hex ) {
