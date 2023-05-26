@@ -1,11 +1,11 @@
 <?php get_header(); ?>
 
-<div class="container" id="pokemon">
+<div class="container d-flex flex-column flex-grow-1" id="pokemon">
 	<?php
 	while ( have_posts() ) :
 		the_post();
 		?>
-		<div class="row">
+		<div class="row d-flex align-content-center flex-grow-1 mb-5">
 			<div class="col-md-6 order-md-2">
 				<!-- Display the featured image (Photo of the Pokémon) -->
 				<?php if ( has_post_thumbnail() ) : ?>
