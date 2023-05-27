@@ -9,9 +9,7 @@ use League\ColorExtractor\Color;
 final class Pokerfever {
 
 	public static function init() {
-		self::register_post_types();
-
-		// add_action( 'wp_enqueue_scripts', array( self::class, 'enqueue_scripts' ) );
+		add_action( 'init', array( self::class, 'register_post_types' ) );
 
 		add_action(
 			'wp_footer',
@@ -58,6 +56,14 @@ final class Pokerfever {
 
 		add_action( 'wp_ajax_nopriv_load_oldest_pokedex_number', array( self::class, 'load_oldest_pokedex_number_callback' ) );
 
+		add_filter(
+			'wp_get_object_terms_args',
+			function( $args ) {
+				$args['orderby'] = 'term_order';
+				return $args;
+			}
+		);
+
 		do_action( 'pokefever_loaded' );
 	}
 
@@ -72,6 +78,10 @@ final class Pokerfever {
 			)
 		);
 
+		if ( ! $pokemon ) {
+			wp_die( 'No Pokemon found.' );
+		}
+
 		// Redirect to the pokemon's page.
 		wp_safe_redirect( get_permalink( $pokemon[0]->ID ) );
 		exit;
@@ -83,8 +93,6 @@ final class Pokerfever {
 		$saved_api_ids = wp_cache_get( 'saved_api_ids', 'pokefever' );
 
 		if ( ! is_array( $saved_api_ids ) ) {
-			var_dump( 'value is not cached' );
-
 			// Compile a list of the existing pokemon on our local database.
 			$saved_api_ids = $wpdb->get_col( "SELECT meta_value from {$wpdb->prefix}postmeta WHERE meta_key = 'pokemon_api_id'" );
 
@@ -116,6 +124,88 @@ final class Pokerfever {
 
 		$pokemon_data = self::get_pokemon_data_from_api( $data );
 
+		$types = collect( $pokemon_data->types )->map(
+			function( $type ) {
+				$term = get_term_by( 'slug', $type->type->name, 'pokemon_type', ARRAY_A );
+
+				if ( ! $term ) {
+					wp_insert_term( ucfirst( $type->type->name ), 'pokemon_type' );
+					$term = get_term_by( 'slug', $type->type->name, 'pokemon_type', ARRAY_A );
+				}
+
+				return $term['slug'] ?? null;
+			}
+		)->toArray();
+
+		$moves = collect( $pokemon_data->moves )
+		->filter(
+			function( $move ) {
+				return $move->version_group_details[0]->move_learn_method->name === 'egg'; // This gives us the moves that the pokemon already knows when it is born.
+			}
+		)->map(
+			function( $move ) {
+				$term = get_term_by( 'slug', $move->move->name, 'pokemon_move', ARRAY_A );
+
+				$results = wp_remote_get( $move->move->url );
+
+				if ( is_wp_error( $results ) ) {
+					// translators: %s is the error message.
+					wp_die( sprintf( esc_html_e( 'Something went wrong: %s', 'pokefever' ), $results->get_error_message() ) );
+				}
+
+				$body = wp_remote_retrieve_body( $results );
+
+				$data = json_decode( $body );
+
+				$description = self::get_english_description( $data->flavor_text_entries );
+
+				if ( ! $term ) {
+					wp_insert_term(
+						ucwords( collect( explode( '-', $move->move->name ) )->join( ' ' ) ),
+						'pokemon_move',
+						array(
+							'slug'        => $move->move->name,
+							'description' => $description,
+						)
+					);
+					$term = get_term_by( 'slug', $move->move->name, 'pokemon_move', ARRAY_A );
+				}
+
+				return $term['slug'] ?? null;
+			}
+		)->toArray();
+
+		$pokedex_entries = collect( $data->pokedex_numbers )->filter(
+			function( $pokedex ) {
+				return true;
+			}
+		)->map(
+			function( $pokedex ) {
+				$results = wp_remote_get( $pokedex->pokedex->url );
+
+				if ( is_wp_error( $results ) ) {
+					// translators: %s is the error message.
+					wp_die( sprintf( esc_html_e( 'Something went wrong: %s', 'pokefever' ), $results->get_error_message() ) );
+				}
+
+				$body = wp_remote_retrieve_body( $results );
+
+				$data = json_decode( $body );
+
+				$pokedex->pokedex->description = self::get_english_description( $data->descriptions, 'description' );
+
+				$pokedex->pokedex->version_groups = $data->version_groups;
+
+				$pokedex->pokedex->game_name = ( collect( $pokedex->pokedex->version_groups )->first()->name ) ?? null;
+
+				return $pokedex;
+			}
+		)->filter(
+			function( $pokedex ) {
+				return $pokedex->pokedex->game_name !== null;
+			}
+		)->toArray();
+
 		$pokemon = array(
 			'post_title'   => ucfirst( $data->name ),
 			'post_name'    => strtolower( $data->name ),
@@ -128,11 +218,16 @@ final class Pokerfever {
 			),
 		);
 
+		// dd( $pokemon );
+
 		$pokemon_post = wp_insert_post( $pokemon );
 
 		if ( is_wp_error( $pokemon_post ) ) {
 			wp_die( $pokemon_post->get_error_message() );
 		}
+
+		wp_set_post_terms( $pokemon_post, $types, 'pokemon_type' );
+		wp_set_post_terms( $pokemon_post, $moves, 'pokemon_move' );
 
 		// Set the featured image.
 		$image_url = $pokemon_data->sprites->other->{'official-artwork'}->front_default ?? null;
@@ -262,12 +357,12 @@ final class Pokerfever {
 		return $data;
 	}
 
-	public static function get_english_description( $available_descriptions ) {
+	public static function get_english_description( $available_descriptions, $attribute_name = 'flavor_text' ) {
 		$english_description = collect( $available_descriptions )->filter(
 			function( $description ) {
 				return 'en' === $description->language->name;
 			}
-		)->first()->flavor_text ?? __( 'No description available.', 'pokefever' );
+		)->first()->{$attribute_name} ?? __( 'No description available.', 'pokefever' );
 
 		return str_replace( "\n", ' ', $english_description );
 	}
@@ -417,13 +512,13 @@ final class Pokerfever {
 		echo '<textarea id="pokemon_attacks" name="pokemon_attacks">' . esc_textarea( $pokemon_attacks ) . '</textarea>';
 	}
 
-	protected static function register_post_types() {
+	public static function register_post_types() {
 		register_post_type(
 			'pokemon',
 			array(
 				'labels'       => array(
-					'name'          => __( 'Pokémon' ),
-					'singular_name' => __( 'Pokémon' ),
+					'name'          => __( 'Pokémon', 'pokefever' ),
+					'singular_name' => __( 'Pokémon', 'pokefever' ),
 				),
 				'public'       => true,
 				'has_archive'  => true,
@@ -438,8 +533,17 @@ final class Pokerfever {
 			'pokemon_type',
 			'pokemon',
 			array(
-				'label'        => __( 'Pokemon Type' ),
-				'hierarchical' => true,
+				'label'        => __( 'Pokemon Type', 'pokefever' ),
+				'hierarchical' => false,
+			)
+		);
+
+		register_taxonomy(
+			'pokemon_move',
+			'pokemon',
+			array(
+				'label'        => __( 'Pokemon Move', 'pokefever' ),
+				'hierarchical' => false,
 			)
 		);
 	}

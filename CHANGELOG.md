@@ -26,3 +26,4 @@ Fontes:
 - Initial Layout <https://www.loom.com/share/ee03ab4a46b4492694c1501a81d9e64b>
 - Implementing /generate <https://www.loom.com/share/f08fc521533a499981477d924f47a9f3>
 - Implementing /random <https://www.loom.com/share/4ffb639a8fda415dbd2682314311e2dd>
+- <https://www.loom.com/share/17372703273849978571c3fb74ec9d14>

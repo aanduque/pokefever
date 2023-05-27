@@ -38,7 +38,9 @@
 		"wptrt/wpthemereview": "^0.2.1",
 		"phpunit/phpunit": "^9",
 		"yoast/phpunit-polyfills": "^1.0",
-		"pestphp/pest": "^1.23"
+		"pestphp/pest": "^1.23",
+		"illuminate/support": "^10.12",
+		"larapack/dd": "^1.1"
 	},
 	"scripts": {
 		"php-lint": "@php ./vendor/php-parallel-lint/php-parallel-lint/parallel-lint --exclude vendor --exclude node_modules --exclude dist --exclude .git --exclude .phpstan-cache .",

@@ -45,6 +45,7 @@
 			<property name="text_domain" type="array">
 				<element value="understrap" />
 				<element value="woocommerce" />
+				<element value="pokefever" />
 			</property>
 		</properties>
 	</rule>
