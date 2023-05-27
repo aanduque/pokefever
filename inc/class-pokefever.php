@@ -204,7 +204,7 @@ final class Pokerfever {
 			function( $pokedex ) {
 				return $pokedex->pokedex->game_name !== null;
 			}
-		)->toArray();
+		);
 
 		$pokemon = array(
 			'post_title'   => ucfirst( $data->name ),
@@ -213,12 +213,14 @@ final class Pokerfever {
 			'post_status'  => 'publish',
 			'post_type'    => 'pokemon',
 			'meta_input'   => array(
-				'pokemon_api_id' => $data->id,
-				'pokemon_weight' => absint( $pokemon_data->weight ) / 10,
+				'pokemon_api_id'                      => $data->id,
+				'pokemon_weight'                      => absint( $pokemon_data->weight ) / 10,
+				'pokemon_pokedex_entry_number'        => $pokedex_entries->last()->entry_number ?? null,
+				'pokemon_pokedex_game_name'           => $pokedex_entries->last()->pokedex->game_name ?? null,
+				'pokemon_pokedex_entry_number_oldest' => $pokedex_entries->first()->entry_number ?? null,
+				'pokemon_pokedex_game_name_oldest'    => $pokedex_entries->first()->pokedex->game_name ?? null,
 			),
 		);
-
-		// dd( $pokemon );
 
 		$pokemon_post = wp_insert_post( $pokemon );
 
