@@ -5,3 +5,5 @@
 
 $red: #e74c3c; // Thats a sample how you could change a BootStrap variable.
 $primary: $red;  // Once we've changed the value, we'll also make it the primary brand color.
+
+$enable-negative-margins: true; // Enables negative margins for all breakpoints.

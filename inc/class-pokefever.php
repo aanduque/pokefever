@@ -215,6 +215,7 @@ final class Pokerfever {
 			'meta_input'   => array(
 				'pokemon_api_id'                      => $data->id,
 				'pokemon_weight'                      => absint( $pokemon_data->weight ) / 10,
+				'pokemon_height'                      => $pokemon_data->height * 10,
 				'pokemon_pokedex_entry_number'        => $pokedex_entries->last()->entry_number ?? null,
 				'pokemon_pokedex_game_name'           => $pokedex_entries->last()->pokedex->game_name ?? null,
 				'pokemon_pokedex_entry_number_oldest' => $pokedex_entries->first()->entry_number ?? null,
@@ -390,6 +391,8 @@ final class Pokerfever {
 					--bs-primary-rgb: $primary_rgb->red,$primary_rgb->green,$primary_rgb->blue;
 					--bs-secondary-rgb: $secondary_rgb->red,$secondary_rgb->green,$secondary_rgb->blue;
 					--bs-link-color: $primary;
+					--bs-bg-opacity: 1;
+					--pokemon-linear-gradient: linear-gradient(0deg, rgba(var(--bs-secondary-rgb),0.75) 0%, rgba(var(--bs-primary-rgb),1) 90%);
 				}
 
 					.site {
@@ -399,9 +402,9 @@ final class Pokerfever {
 					}
 				
 					body {
-						height: 100vh;
+						min-height: 100vh;
 						position: relative;
-						background: linear-gradient(0deg, rgba(var(--bs-secondary-rgb),0.75) 0%, rgba(var(--bs-primary-rgb),1) 90%);
+						background: var(--pokemon-linear-gradient);
 					}
 
 					body::before {
@@ -422,13 +425,33 @@ final class Pokerfever {
 				// );
 	}
 
-	public static function load_oldest_pokedex_number_callback() {
-		$post_id = $_POST['post_id'];
+	public static function override_card_colors( $primary = '#e74c3c', $secondary = '#c0392b' ) {
+		$primary_rgb   = self::hex_to_rgb( $primary );
+		$secondary_rgb = self::hex_to_rgb( $secondary );
 
-		if ( $pokedex_number_oldest = get_post_meta( $post_id, 'pokedex_number_oldest', true ) ) {
-			echo esc_html( $pokedex_number_oldest );
+		if ( ! $primary_rgb ) {
+			return '';
+		}
+
+		return "
+		--bs-primary: $primary;
+		--bs-primary-rgb: $primary_rgb->red,$primary_rgb->green,$primary_rgb->blue;
+		--bs-link-color: $primary;
+		--bs-bg-opacity: 1;
+		--pokemon-linear-gradient-angle: 90deg;
+		--pokemon-linear-gradient: linear-gradient(var(--pokemon-linear-gradient-angle), white 0%, rgba(var(--bs-primary-rgb),0.6) 100%);";
+	}
+
+	public static function load_oldest_pokedex_number_callback() {
+		check_ajax_referer( 'pokefever-nonce' );
+
+		$post_id = $_POST['post_id'] ?? 0;
+
+		if ( $pokedex_number_oldest = get_post_meta( $post_id, 'pokemon_pokedex_entry_number_oldest', true ) ) {
+			$pokedex_game_name_oldest = get_post_meta( $post_id, 'pokemon_pokedex_game_name_oldest', true );
+			echo esc_html( $pokedex_number_oldest . ' - ' . $pokedex_game_name_oldest );
 		} else {
-			echo 'No data available.';
+			wp_send_json_error( __( 'No pokedex number found.', 'pokefever' ), 404 );
 		}
 
 		exit(); // this is required to terminate immediately and return a proper response

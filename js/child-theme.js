@@ -1,6 +1,6 @@
 /*!
   * Understrap v1.2.0 (https://understrap.com)
-  * Copyright 2013-2022 The Understrap Authors (https://github.com/understrap/understrap/graphs/contributors)
+  * Copyright 2013-2023 The Understrap Authors (https://github.com/understrap/understrap/graphs/contributors)
   * Licensed under GPL-3.0 (undefined)
   */
 (function (global, factory) {
@@ -6722,26 +6722,138 @@
 	 * Learn more: https://git.io/vWdr2
 	 */
 	(function () {
-	  var isWebkit = navigator.userAgent.toLowerCase().indexOf('webkit') > -1,
-	    isOpera = navigator.userAgent.toLowerCase().indexOf('opera') > -1,
-	    isIe = navigator.userAgent.toLowerCase().indexOf('msie') > -1;
-	  if ((isWebkit || isOpera || isIe) && document.getElementById && window.addEventListener) {
-	    window.addEventListener('hashchange', function () {
-	      var id = location.hash.substring(1),
-	        element;
-	      if (!/^[A-z0-9_-]+$/.test(id)) {
-	        return;
-	      }
-	      element = document.getElementById(id);
-	      if (element) {
-	        if (!/^(?:a|select|input|button|textarea)$/i.test(element.tagName)) {
-	          element.tabIndex = -1;
-	        }
-	        element.focus();
-	      }
-	    }, false);
-	  }
+	    var isWebkit = navigator.userAgent.toLowerCase().indexOf('webkit') > -1, isOpera = navigator.userAgent.toLowerCase().indexOf('opera') > -1, isIe = navigator.userAgent.toLowerCase().indexOf('msie') > -1;
+	    if ((isWebkit || isOpera || isIe) && document.getElementById && window.addEventListener) {
+	        window.addEventListener('hashchange', function () {
+	            var id = location.hash.substring(1), element;
+	            if (!(/^[A-z0-9_-]+$/.test(id))) {
+	                return;
+	            }
+	            element = document.getElementById(id);
+	            if (element) {
+	                if (!(/^(?:a|select|input|button|textarea)$/i.test(element.tagName))) {
+	                    element.tabIndex = -1;
+	                }
+	                element.focus();
+	            }
+	        }, false);
+	    }
 	})();
+
+	/**
+	 * @typedef {() => void} Callback
+	 *
+	 * TODO: Remove this typedef and inline `() => void` type.
+	 *
+	 * This typedef is used so that a descriptive type is provided in our
+	 * automatically generated documentation.
+	 *
+	 * An in-line type `() => void` would be preferable, but the generated
+	 * documentation is `null` in that case.
+	 *
+	 * @see https://github.com/WordPress/gutenberg/issues/18045
+	 */
+
+	/**
+	 * Specify a function to execute when the DOM is fully loaded.
+	 *
+	 * @param {Callback} callback A function to execute after the DOM is ready.
+	 *
+	 * @example
+	 * ```js
+	 * import domReady from '@wordpress/dom-ready';
+	 *
+	 * domReady( function() {
+	 * 	//do something after DOM loads.
+	 * } );
+	 * ```
+	 *
+	 * @return {void}
+	 */
+	function domReady(callback) {
+	  if (typeof document === 'undefined') {
+	    return;
+	  }
+	  if (document.readyState === 'complete' ||
+	  // DOMContentLoaded + Images/Styles/etc loaded, so we call directly.
+	  document.readyState === 'interactive' // DOMContentLoaded fires at this point, so we call directly.
+	  ) {
+	    return void callback();
+	  } // DOMContentLoaded has not fired yet, delay callback until then.
+
+	  document.addEventListener('DOMContentLoaded', callback);
+	}
+
+	var initializeAjaxFilter = function () {
+	    var filterElement = document.getElementById('filter');
+	    filterElement === null || filterElement === void 0 ? void 0 : filterElement.addEventListener('submit', function (event) {
+	        var _a, _b;
+	        event.preventDefault();
+	        var focusedElement = (_a = document.activeElement) === null || _a === void 0 ? void 0 : _a.getAttribute('name');
+	        var parentElement = filterElement.parentElement;
+	        if (parentElement) {
+	            parentElement.style.transition = 'opacity 0.5s ease-in-out';
+	            parentElement.classList.add('opacity-50');
+	        }
+	        var formData = new FormData(filterElement);
+	        var formAction = new URL((_b = filterElement === null || filterElement === void 0 ? void 0 : filterElement.action) !== null && _b !== void 0 ? _b : '');
+	        // Remove all search params
+	        formAction.search = '';
+	        fetch(formAction, {
+	            method: 'POST',
+	            body: formData,
+	        }).then(function (response) { return response.text(); })
+	            .then(function (html) {
+	            var _a, _b;
+	            console.log(html);
+	            var parser = new DOMParser();
+	            var responseDOM = parser.parseFromString(html, "text/html");
+	            var mainListElement = (_a = responseDOM.getElementById('list')) !== null && _a !== void 0 ? _a : null;
+	            if (mainListElement) {
+	                var mainList = document.getElementById('list');
+	                mainList.innerHTML = mainListElement.innerHTML;
+	                if (parentElement) {
+	                    parentElement.style.transition = 'opacity 0.5s ease-in-out';
+	                    parentElement.classList.remove('opacity-50');
+	                }
+	                /**
+	                 * Focus on the element that was focused before the form was submitted.
+	                 */
+	                focusedElement && ((_b = document.getElementsByName(focusedElement)[0]) === null || _b === void 0 ? void 0 : _b.focus());
+	                initializeAjaxFilter();
+	            }
+	        })
+	            .catch(function (error) {
+	            console.log(error);
+	        });
+	    });
+	};
+	// declare const pokefever: PokefeverSettings
+	domReady(initializeAjaxFilter);
+	jQuery(function ($) {
+	    var loadOldPokedexNumber = function (event) {
+	        event.preventDefault();
+	        $('#load-oldest-pokedex-number').hide(0);
+	        $('#oldest-pokedex-number').show(0);
+	        var data = {
+	            action: 'load_oldest_pokedex_number',
+	            post_id: pokefever.current_post_id,
+	            _ajax_nonce: pokefever.nonce,
+	        };
+	        $.post(pokefever.ajax_url, data)
+	            .done(function (response) {
+	            $('#oldest-pokedex-number').html(response);
+	        })
+	            .fail(function (jqxhr) {
+	            $('#oldest-pokedex-number').html(pokefever.messages[jqxhr.status]);
+	            setTimeout(function () {
+	                $('#oldest-pokedex-number').hide(0);
+	                $('#load-oldest-pokedex-number').show(0);
+	            }, 3000);
+	        });
+	    };
+	    $('#load-oldest-pokedex-number').on('click', loadOldPokedexNumber);
+	});
 
 	exports.Alert = alert;
 	exports.Button = button;

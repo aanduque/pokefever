@@ -1,7 +1,7 @@
 {
-  "name": "understrap-child",
-  "version": "1.2.0",
-  "description": "Basic Child Theme for Understrap Theme Framework: https://github.com/understrap/understrap",
+  "name": "pokefever",
+  "version": "0.0.1",
+  "description": "Technical test for the Fever selection process.",
   "main": "index.js",
   "scripts": {
     "bs": "browser-sync start --config src/build/browser-sync.config.js",
@@ -15,7 +15,7 @@
     "watch": "npm-run-all --parallel watch-run-*",
     "watch-bs": "npm-run-all --parallel bs watch-run-*",
     "watch-run-css": "nodemon --watch src/sass/ --ext scss --exec \"npm-run-all css\"",
-    "watch-run-js": "nodemon --watch src/js/ --ext js --exec \"npm-run-all js\"",
+    "watch-run-js": "nodemon --watch src/js/ --ext ts --exec \"npm-run-all js\"",
     "copy-assets": "node src/build/copy-assets.js",
     "dist": "npm-run-all --parallel css js",
     "dist-build": "node src/build/dist-build.js",
@@ -41,7 +41,6 @@
     "url": "https://github.com/understrap/understrap-child/issues"
   },
   "homepage": "https://understrap.com",
-  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.19.6",
     "@babel/preset-env": "^7.19.4",
@@ -51,12 +50,16 @@
     "@rollup/plugin-multi-entry": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-replace": "^5.0.1",
+    "@rollup/plugin-typescript": "^11.1.1",
+    "@typescript-eslint/eslint-plugin": "^5.59.7",
+    "@typescript-eslint/parser": "^5.59.7",
     "autoprefixer": "^10.4.13",
     "bootstrap": "^5.2.2",
     "browser-sync": "^2.27.10",
     "browserslist": "^4.21.4",
     "caniuse-lite": "^1.0.30001430",
     "clean-css-cli": "^5.6.1",
+    "eslint": "^8.41.0",
     "font-awesome": "^4.7.0",
     "nodemon": "^2.0.20",
     "npm-run-all": "^4.1.5",
@@ -66,6 +69,12 @@
     "rollup": "^3.2.5",
     "sass": "^1.56.0",
     "terser": "^5.15.1",
+    "typescript": "^5.0.4",
     "understrap": "github:understrap/understrap#develop"
+  },
+  "dependencies": {
+    "@types/jquery": "^3.5.16",
+    "@wordpress/dom-ready": "^3.34.0",
+    "tslib": "^2.5.2"
   }
 }

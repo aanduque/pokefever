@@ -47,7 +47,25 @@ function theme_enqueue_styles() {
 
 	$js_version = $theme_version . '.' . filemtime( get_stylesheet_directory() . $theme_scripts );
 
-	wp_enqueue_script( 'child-understrap-scripts', get_stylesheet_directory_uri() . $theme_scripts, array(), $js_version, true );
+	wp_register_script( 'child-understrap-scripts', get_stylesheet_directory_uri() . $theme_scripts, array(), $js_version );
+
+	wp_localize_script(
+		'child-understrap-scripts',
+		'pokefever',
+		array(
+			'ajax_url'        => admin_url( 'admin-ajax.php' ),
+			'nonce'           => wp_create_nonce( 'pokefever-nonce' ),
+			'current_post_id' => get_the_ID(),
+			'messages'        => array(
+				'403' => __( 'Failed to fetch data.', 'pokerfever' ),
+				'404' => __( 'Old Pokedex entry not found.', 'pokerfever' ),
+				'500' => __( 'Something went wrong.', 'pokerfever' ),
+			),
+		)
+	);
+
+	wp_enqueue_script( 'child-understrap-scripts' );
+
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}

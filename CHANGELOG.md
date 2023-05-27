@@ -27,3 +27,10 @@ Fontes:
 - Implementing /generate <https://www.loom.com/share/f08fc521533a499981477d924f47a9f3>
 - Implementing /random <https://www.loom.com/share/4ffb639a8fda415dbd2682314311e2dd>
 - <https://www.loom.com/share/17372703273849978571c3fb74ec9d14>
+- <https://www.loom.com/share/6fca8fbea66642eeb105421a9cc4037d>
+- <https://www.loom.com/share/9e6b535e17b7408cbf2725991b0b1595>
+- <https://www.loom.com/share/d905cf77718b4b96869159cf5b3e4092>
+- <https://www.loom.com/share/bfb39ab2aedb4cd883275cb4b462f229>
+- <https://www.loom.com/share/cef5f888dda9425997e81160417ddb75>
+- <https://www.loom.com/share/f7b24fd4941f4213bc5c3a386694614e>
+- <https://www.loom.com/share/f8ff006b86d440abb039299c401e7950>
