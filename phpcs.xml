@@ -48,7 +48,7 @@
 		<properties>
 			<!-- Value: replace the function, class, and variable prefixes used. Separate multiple
 			prefixes with a comma. -->
-			<property name="prefixes" type="array" value="pokefever,pf_,Pokefever" />
+			<property name="prefixes" type="array" value="pokefever,pf,pf_,Pokefever" />
 		</properties>
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>

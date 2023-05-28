@@ -15698,11 +15698,11 @@ figure.woocommerce-product-gallery__wrapper {
   background-color: var(--pokefever-bg-gray);
 }
 
-#hero {
+.pokefever-bg-overlay {
   position: relative;
   overflow: hidden;
 }
-#hero::before {
+.pokefever-bg-overlay::before {
   background: var(--pokefever-hero-bg);
   background-size: cover;
   background-position: center right;

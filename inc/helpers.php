@@ -1,8 +1,14 @@
-<?php
+<?php // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.ShortPrefixPassed
+/**
+ * Helper functions for the pokefever theme.
+ *
+ * @package pokefever
+ */
 
-namespace pf;
+namespace pf; // phpcs:ignore
 
 use Pokefever\Pokefever;
+use function pf\container as app;
 use function paginate_links as wp_paginate_links;
 
 /**
@@ -14,6 +20,14 @@ function container() {
 	return Pokefever::getInstance();
 }
 
+/**
+ * Modified version of paginate_links() function that outputs Bootstrap compatible pagination.
+ *
+ * @see paginate_links()
+ *
+ * @param array $args Arguments to pass to paginate_links().
+ * @return string The markup for the pagination links.
+ */
 function paginate_links( $args = array() ) {
 
 	/**
@@ -41,5 +55,20 @@ function paginate_links( $args = array() ) {
 	)->join( PHP_EOL );
 
 	return "<ul class=\"pagination justify-content-center\">$links</ul>";
+
+}
+
+/**
+ * Get the registered providers' post type slugs as well as their arguments.
+ *
+ * @return array
+ */
+function get_registered_post_types() {
+
+	return collect( app()->get_providers() )->map(
+		function( $provider ) {
+			return $provider->post_type() ?? array();
+		}
+	)->toArray();
 
 }

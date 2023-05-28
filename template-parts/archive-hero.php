@@ -7,7 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 ?>
-<div id="hero" class="p-5 mb-4 border-bottom">
+<div id="hero" class="p-5 mb-4 border-bottom pokefever-bg-overlay">
 	<div class="container pt-5 pb-4 text-center text-lg-start">
 		<h1 class="display-5 fw-bold"><?php echo esc_html( post_type_archive_title( '', false ) ); ?></h1>
 		<div class="fs-4 col-lg-5">
