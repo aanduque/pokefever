@@ -20,6 +20,7 @@ Fontes:
 - <https://packagist.org/packages/league/color-extractor> Color Extractor Library
 - Bootstrap Docs:
   - Columns: <https://getbootstrap.com/docs/5.3/layout/columns/>
+  - Container <https://packagist.org/packages/illuminate/container>
 
 
 - Loom Sessions
@@ -34,3 +35,22 @@ Fontes:
 - <https://www.loom.com/share/cef5f888dda9425997e81160417ddb75>
 - <https://www.loom.com/share/f7b24fd4941f4213bc5c3a386694614e>
 - <https://www.loom.com/share/f8ff006b86d440abb039299c401e7950>
+- <https://www.loom.com/share/f352d78419934e578860c1175a6b0440>
+- <https://www.loom.com/share/8047f8eb55b0423f9e87282565d9ce3f>
+- <https://www.loom.com/share/d67d48b05a1a4c2f98a78e7cba07f44c>
+- <https://www.loom.com/share/cb6eb162e17f454caefc0f0bdfe9a501>
+
+So, the plan for refactoring is not really that complicated.
+Right now, all of our logic is pretty much concentrated on the class-pokefever.php class.
+We'll start to break it down into separate components, and make sure the main "provider" is swappable
+so we can add new providers later on (which will do with the Digimon API provider).
+
+For the next sessions I'm not at my desk, so I can't really record the camera and mic, but whenever necessary, I'll add notes here.
+
+Let's begin.
+
+First, I'll install a couple of components I want to make use of. The first is the laravel illuminate/container
+package, which will allow us to register dependencies and resolve them dynamically whenever necessary.
+It also allows us to have a better way to manage singletons, when necessary.
+
+I'll also add a helper file that we can add our functions to.

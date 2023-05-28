@@ -13,7 +13,7 @@ require_once __DIR__ . '/vendor/autoload.php';
  *
  * @since 0.0.1
  */
-add_action( 'after_setup_theme', array( Pokerfever\Pokerfever::class, 'init' ) );
+add_action( 'after_setup_theme', 'pf\\container' );
 
 /**
  * Removes the parent themes stylesheet and scripts from inc/enqueue.php

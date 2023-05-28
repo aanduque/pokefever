@@ -1,44 +1,11 @@
 <?php
 
-use Pokerfever\Pokerfever;
+use Pokefever\Pokefever;
 
  get_header(); ?>
 
-<div class="p-5 mb-4 bg-body-tertiary">
-	<div class="container py-5 text-center text-lg-start">
-		<h1 class="display-5 fw-bold"><?php the_title(); ?></h1>
-		<div class="fs-4">
-			<?php the_content(); ?>
-		</div>
-		<a href="#pokemon-list" class="btn btn-primary text-white btn-lg">
-			<?php esc_html_e( 'Check our Pokémon list', 'pokemon' ); ?>
-		</a>
-	</div>
-</div>
+<?php get_template_part( 'template-parts/archive-hero' ); ?>
 
-<?php
-
-// // Get all Pokémon
-// $pokemons = new WP_Query(
-// array(
-// 'post_type'      => 'pokemon',
-// 'posts_per_page' => $pokemons_per_page,
-// 'paged'          => $current_page,
-// 'offset'         => ( $current_page - 1 ) * $pokemons_per_page,
-// )
-// );
-
-$pagination = paginate_links(
-	array(
-		// 'base'      => add_query_arg( 'paged', '%#%' ),
-		// 'format'    => '',
-		'prev_text' => __( '&laquo;', 'pokemon' ),
-		'next_text' => __( '&raquo;', 'pokemon' ),
-		'type'      => 'array',
-	)
-);
-
-?>
 
 <div class="container" id="list">
 	<form id="filter">
@@ -78,7 +45,7 @@ $pagination = paginate_links(
 			the_post();
 			?>
 
-		<div class="col d-flex" style="<?php echo esc_attr( Pokerfever::override_card_colors( get_post_meta( get_the_ID(), 'pokemon_primary_color', true ), get_post_meta( get_the_ID(), 'pokemon_secondary_color', true ) ) ); ?>">
+		<div class="col d-flex" style="<?php echo esc_attr( Pokefever::override_card_colors( get_post_meta( get_the_ID(), 'pokemon_primary_color', true ), get_post_meta( get_the_ID(), 'pokemon_secondary_color', true ) ) ); ?>">
 			<a href="<?php the_permalink(); ?>" class="card border flex-fill text-decoration-none text-dark" style="background: var(--pokemon-linear-gradient)">
 				<div class="row g-0">
 					<div class="col-8 my-auto">
@@ -130,25 +97,9 @@ $pagination = paginate_links(
 
 <div class="mt-4">
 
-		<ul class="pagination justify-content-center">
-		<?php
+				<?php get_template_part( 'template-parts/archive-pagination' ); ?>
 
-		collect( $pagination )->each(
-			function( $link ) {
-				$link = str_replace( 'page-numbers', 'page-link', $link );
-				$link = str_replace( 'current', 'active', $link );
-				if ( strpos( $link, 'span' ) !== false && strpos( $link, 'active' ) === false ) {
-					$link = str_replace( 'page-link', 'page-link disabled', $link );
-				}
-
-				echo "<li class=\"page-item\">$link</li>";
-			}
-		);
-
-		?>
-		</ul>
-
-	</div>
+</div>
 
 	</form>
 

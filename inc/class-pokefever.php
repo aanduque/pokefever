@@ -1,15 +1,98 @@
 <?php
 
-namespace Pokerfever;
+namespace Pokefever;
 
+use Illuminate\Container\Container;
+use Illuminate\Translation\ArrayLoader;
+use Illuminate\Translation\Translator;
+use Illuminate\Validation\Factory;
 use League\ColorExtractor\ColorExtractor;
 use League\ColorExtractor\Palette;
 use League\ColorExtractor\Color;
+use Pokefever\Models\Monster;
+use function pf\container as app;
 
-final class Pokerfever {
+final class Pokefever extends Container {
+
+	protected function __construct() {
+		// Sets up the validator instance.
+		$this->instance(
+			'validator',
+			new Factory(
+				new Translator( new ArrayLoader(), 'en' ),
+				$this,
+			)
+		);
+
+		// Register the default pokemon provider.
+		$this->register_provider( 'pokemon', new \Pokefever\Providers\Pokemon() );
+
+		// Boot the container.
+		$this->boot();
+
+		self::init();
+	}
+
+	protected function boot() {
+
+		// Registers the post types for each provider.
+		foreach ( $this->get_providers() as $provider ) {
+			list($post_type_slug, $post_type_args) = $provider->post_type();
+			register_post_type( $post_type_slug, $post_type_args );
+		}
+
+		// Registers the taxonomies for each provider.
+		foreach ( $this->get_providers() as $provider ) {
+			$taxonomies = $provider->taxonomies();
+			foreach ( $taxonomies as $taxonomy_slug => $taxonomy ) {
+				list($taxonomy_post_types, $taxonomy_args) = $taxonomy;
+				register_taxonomy( $taxonomy_slug, $taxonomy_post_types, $taxonomy_args );
+			}
+		}
+	}
+
+	public function get_default_provider() {
+		return apply_filters( 'pokefever/providers/default', 'pokemon', $this );
+	}
+
+	public function get_current_provider() {
+		// get the current provider key saved on the cookie, if the user is not logged in or in the user meta, if the user is logged in.
+		$current_provider_key = get_current_user_id() ? get_user_meta( get_current_user_id(), 'pokefever_current_provider', true ) : ( $_COOKIE['pokefever_current_provider'] ?? $this->get_default_provider() );
+
+		return apply_filters( 'pokefever/providers/current', $this->get( $current_provider_key ), $this );
+	}
+
+	public function register_provider( string $provider_name, $provider ) {
+		$this->instance( $provider_name, $provider );
+		$this->tag( $provider_name, 'provider' );
+		return $this;
+	}
+
+	public function get_providers() {
+		return $this->tagged( 'provider' );
+	}
 
 	public static function init() {
-		add_action( 'init', array( self::class, 'register_post_types' ) );
+		// add_action( 'init', array( self::class, 'register_post_types' ) );
+
+		add_action(
+			'wp_head',
+			function() {
+				$post_type = get_post_type();
+
+				if ( app()->has( $post_type ) ) {
+					$provider    = app()->get( $post_type );
+					$cover_image = $provider->cover_image();
+
+					if ( $cover_image ) {
+						echo '<style>#hero {
+							--pokefever-hero-bg: url(' . esc_attr( $cover_image ) . ');
+						}</style>';
+					}
+				}
+			},
+			99
+		);
 
 		add_action(
 			'wp_footer',
@@ -89,6 +172,13 @@ final class Pokerfever {
 
 	public static function generate_pokemon() {
 		global $wpdb;
+
+		new Monster(
+			array(
+				'name'        => 'sasa',
+				'description' => 'sasa',
+			)
+		);
 
 		$saved_api_ids = wp_cache_get( 'saved_api_ids', 'pokefever' );
 
@@ -258,9 +348,6 @@ final class Pokerfever {
 		wp_safe_redirect( get_permalink( $pokemon_post ) );
 
 		exit;
-
-		// Send a call to the pokemon api to get the data for the pokemon with the number we generated.
-		// Save the data to our local database.
 	}
 
 	protected static function extract_colors_from_image( $image_url ) {
@@ -535,42 +622,6 @@ final class Pokerfever {
 
 		echo '<label for="pokemon_attacks">Attacks (separate with commas): </label>';
 		echo '<textarea id="pokemon_attacks" name="pokemon_attacks">' . esc_textarea( $pokemon_attacks ) . '</textarea>';
-	}
-
-	public static function register_post_types() {
-		register_post_type(
-			'pokemon',
-			array(
-				'labels'       => array(
-					'name'          => __( 'Pokémon', 'pokefever' ),
-					'singular_name' => __( 'Pokémon', 'pokefever' ),
-				),
-				'public'       => true,
-				'has_archive'  => true,
-				'rewrite'      => array( 'slug' => 'pokemon' ),
-				'show_in_rest' => false,
-				'supports'     => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ),
-				'menu_icon'    => 'dashicons-palmtree',
-			)
-		);
-
-		register_taxonomy(
-			'pokemon_type',
-			'pokemon',
-			array(
-				'label'        => __( 'Pokemon Type', 'pokefever' ),
-				'hierarchical' => false,
-			)
-		);
-
-		register_taxonomy(
-			'pokemon_move',
-			'pokemon',
-			array(
-				'label'        => __( 'Pokemon Move', 'pokefever' ),
-				'hierarchical' => false,
-			)
-		);
 	}
 
 }

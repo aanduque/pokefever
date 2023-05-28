@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<ruleset name="Understrap Coding Standards">
+<ruleset name="Pokefever Coding Standards">
 
-	<description>Apply WordPress Coding Standards to Understrap</description>
+	<description>Apply WordPress Coding Standards to Pokefever</description>
 
 	<!-- Whenever possible, cache the scan results and re-use those for unchanged files on the next
 	scan. -->
@@ -15,6 +15,12 @@
 
 	<!-- Show sniff codes in all reports -->
 	<arg value="s" />
+
+	<!-- Show progress of the run -->
+	<arg value="p" />
+
+	<!-- PHP Version being used -->
+	<config name="testVersion" value="8.1-" />
 
 	<!-- Scan these files -->
 	<file>.</file>
@@ -34,6 +40,17 @@
 	<!-- Use the WordPress Ruleset -->
 	<rule ref="WordPress">
 		<include-pattern>*\.php$</include-pattern>
+		<!-- Exclude the naming conventions rule -->
+		<!-- <exclude name="WordPress.NamingConventions.PrefixAllGlobals" /> -->
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<!-- Value: replace the function, class, and variable prefixes used. Separate multiple
+			prefixes with a comma. -->
+			<property name="prefixes" type="array" value="pokefever,pf_,Pokefever" />
+		</properties>
+		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
 
 	<!--
@@ -79,6 +96,8 @@
 				<element value="get_the_archive_description" />
 				<element value="understrap_get_list_item_separator" />
 				<element value="understrap_get_screen_reader_class" />
+				<element value="get_the_post_type_description" />
+				<element value="paginate_links" />
 			</property>
 		</properties>
 	</rule>
@@ -92,13 +111,7 @@
 	</rule>
 
 	<!-- Use the WPThemeReview Ruleset -->
-	<rule ref="WPThemeReview" />
-
-	<rule name="WordPress.NamingConventions.ValidFunctionName">
-		<properties>
-			<property name="exclude" type="array" value="Pokefever" />
-		</properties>
-	</rule>
+	<!-- <rule ref="WPThemeReview" /> -->
 
 	<!--
 		Exclude checking for shortened URLs in Bootstrap's js. files.
@@ -107,4 +120,5 @@
 	<rule ref="WPThemeReview.Privacy.ShortenedURLs.Found">
 		<exclude-pattern>/js/child-theme*\.js</exclude-pattern>
 	</rule>
+
 </ruleset>
