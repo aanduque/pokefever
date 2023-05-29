@@ -1,0 +1,59 @@
+version: '3.3'
+
+services:
+  wordpress:
+    image: pokefever:php8.1-apache
+    build:
+      context: .
+    container_name: pokefever
+    depends_on:
+      - db
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      - ./:/var/www/html/wp-content/themes/pokefever
+      - wp_data:/var/www/html
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  run-wp-cli:
+    image: docker:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - db
+      - wordpress
+    volumes_from:
+      - "wordpress"
+    entrypoint: |
+      sh -c "
+        echo "Wait for 20 seconds before attempting to install..."
+        sleep 20 ;
+        docker exec -t pokefever wp core install --path=/var/www/html --url='http://localhost:8000' --title='Pokefever' --admin_user=admin --admin_password=admin --admin_email='admin@example.com' --allow-root ; 
+        docker exec -t pokefever wp theme install understrap --allow-root ; 
+        docker exec -t pokefever wp theme activate pokefever --allow-root ;
+        docker exec -t pokefever wp rewrite structure '/%postname%/' --allow-root"
+
+  db:
+    image: mariadb:latest
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: wordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+
+volumes:
+  wp_data: {}
+  db_data: {}
