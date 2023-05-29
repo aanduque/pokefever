@@ -228,12 +228,6 @@ class Pokemon implements Monster_Provider {
 			 */
 			$pokemon_data = Util::call_api( "https://pokeapi.co/api/v2/pokemon/{$random_pokemon_id}" );
 
-			if (! ($pokemon_data->species->url ?? null ) ) {
-
-				dd($random_pokemon_id, $pokemon_data);
-
-			}
-
 			/**
 			 * Now, get the pokemon's species data from the API /pokemon-species endpoint.
 			 */
@@ -294,7 +288,7 @@ class Pokemon implements Monster_Provider {
 		$get_pokedex_data_from_api = function( $pokedex ) {
 			$data = Util::call_api( $pokedex->pokedex->url );
 
-			$pokedex->pokedex->description = self::get_localized_text( $data->descriptions, 'description' );
+			$pokedex->pokedex->description = $this->get_localized_text( $data->descriptions, 'description' );
 
 			$pokedex->pokedex->version_groups = $data->version_groups;
 

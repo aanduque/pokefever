@@ -7,6 +7,7 @@
 
 namespace Pokefever; // phpcs:ignore
 
+use Pokefever\Models\Monster;
 use Pokefever\Pokefever;
 use function Pokefever\container as app;
 use function paginate_links as wp_paginate_links;
@@ -117,5 +118,15 @@ function get_monster_colors_for_card( int $monster_id ) {
 		--pokemon-linear-gradient-angle: 90deg;
 		--pokemon-linear-gradient: linear-gradient(var(--pokemon-linear-gradient-angle), white 0%, rgba(var(--bs-primary-rgb),0.6) 100%);
 	";
+
+}
+
+function get_monster_attribute( string $attribute, $default = null, $monster_post = null ) {
+
+	global $post;
+
+	$monster_post ??= $post;
+
+	return Monster::from_post( $monster_post )->attribute( $attribute, $default );
 
 }

@@ -26,11 +26,11 @@ class Monster {
 	protected $post_id = null;
 
 	/**
-	 * The attributes of the monster.
+	 * The data of the monster.
 	 *
 	 * @var array
 	 */
-	protected $attributes = array();
+	protected $data = array();
 
 	/**
 	 * The list of validation rules for the received attributes.
@@ -68,6 +68,77 @@ class Monster {
 	 */
 	public function __construct( array $data ) {
 
+		$this->make( $data );
+
+	}
+
+	/**
+	 * Creates a new instance of the Monster class.
+	 *
+	 * @throws Exception
+	 *
+	 * @param array $data The data to validate and set.
+	 * @return $this
+	 */
+	protected function make( array $data ) {
+
+		/**
+		 * Set the API ID as a meta field.
+		 *
+		 * This is required to make sure we ways save the api_id as a meta field,
+		 * regardless of either or not it was declared by the provider.
+		 */
+		$data['meta']['api_id'] = $data['api_id'] ?? null;
+
+		/**
+		 * Set the data property.
+		 */
+		$this->data = $data;
+
+		/**
+		 * The data is valid. Attach it to the attributes property.
+		 */
+		$this->validate();
+
+		return $this;
+
+	}
+
+	/**
+	 * Returns an attribute of the monster.
+	 *
+	 * @param mixed $key
+	 * @return mixed
+	 */
+	public function attribute( $key, $default = null ) {
+
+		$prefixed_key = "{$this->data['type']}_{$key}";
+
+		if ( metadata_exists( 'post', $this->post_id, $prefixed_key ) ) {
+
+			return get_post_meta( $this->post_id, $prefixed_key, true );
+
+		}
+
+		if ( metadata_exists( 'post', $this->post_id, $key ) ) {
+
+			return get_post_meta( $this->post_id, $prefixed_key, true );
+
+		}
+
+		return $default;
+
+	}
+
+	/**
+	 * Validates the model data.
+	 *
+	 * @throws Exception If the data is invalid.
+	 *
+	 * @return $this
+	 */
+	public function validate() {
+
 		/**
 		 * Get the validator instance from the container.
 		 */
@@ -78,8 +149,8 @@ class Monster {
 		 *
 		 * @link https://laravel.com/docs/10.x/validation
 		 */
-		$validation = $validator->make(
-			$data,
+		$validated = $validator->validate(
+			$this->data,
 			$this->validation_rules(),
 			array(
 				// translators: %s is the name of the field.
@@ -87,32 +158,9 @@ class Monster {
 			)
 		);
 
-		/**
-		 * If the validation fails, we get a wp_die() with the error message.
-		 */
-		if ( $validation->fails() ) {
+		$this->data = $validated;
 
-			$error_message = collect( $validation->errors()->all() )->join( '<br>' );
-
-			wp_die(
-				$error_message, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				__( 'Failed to generate monster', 'pokefever' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			);
-
-		}
-
-		/**
-		 * Set the API ID as a meta field.
-		 *
-		 * This is required to make sure we ways save the api_id as a meta field,
-		 * regardless of either or not it was declared by the provider.
-		 */
-		$this->attributes['meta']['api_id'] = $data['api_id'];
-
-		/**
-		 * The data is valid. Attach it to the attributes property.
-		 */
-		$this->attributes = $validation->validated();
+		return $this;
 
 	}
 
@@ -137,17 +185,24 @@ class Monster {
 	public function save() {
 
 		$monster = array(
-			'post_title'   => $this->attributes['name'],
-			'post_name'    => $this->attributes['slug'],
-			'post_content' => $this->attributes['description'],
-			'post_type'    => $this->attributes['type'],
+			'post_title'   => $this->data['name'],
+			'post_name'    => $this->data['slug'],
+			'post_content' => $this->data['description'],
+			'post_type'    => $this->data['type'],
 			'post_status'  => $this->default_status(),
-			'meta_input'   => collect( $this->attributes['meta'] )->mapWithKeys(
+			'meta_input'   => collect( $this->data['meta'] )->mapWithKeys(
 				function( $value, $key ) {
-					return array( "{$this->attributes['type']}_{$key}" => $value );
+					return array( "{$this->data['type']}_{$key}" => $value );
 				}
 			)->toArray(),
 		);
+
+		/**
+		 * Allows for post updates, if the post ID is set.
+		 */
+		if ( $this->post_id ) {
+			$monster['ID'] = $this->post_id;
+		}
 
 		/**
 		 * Create the Pokemon post.
@@ -182,7 +237,7 @@ class Monster {
 		 * @link https://developer.wordpress.org/reference/functions/wp_insert_post/
 		 * @link https://developer.wordpress.org/reference/functions/wp_set_post_terms/
 		 */
-		collect( $this->attributes['taxonomies'] )->each(
+		collect( $this->data['taxonomies'] ?? array() )->each(
 			function( $terms, $taxonomy ) use ( $pokemon_post ) {
 				wp_set_post_terms( $pokemon_post, $terms, $taxonomy );
 			}
@@ -191,14 +246,14 @@ class Monster {
 		/**
 		 * Saves the monster image as a featured image.
 		 */
-		if ( $this->attributes['image'] ) {
+		if ( $this->data['image'] ) {
 
 			try {
 
 				$attachment_id = Util::download_and_set_image_as_thumbnail(
-					$this->attributes['image'],
+					$this->data['image'],
 					$this->post_id,
-					$this->attributes['name']
+					$this->data['name']
 				);
 
 				/**
@@ -247,6 +302,24 @@ class Monster {
 		}
 
 		return $this->post_id;
+
+	}
+
+	public static function from_post( $post ) {
+
+		$monster = array(
+			'api_id'      => absint( get_post_meta( $post->ID ?? 0, 'api_id', true ) ),
+			'type'        => $post->post_type,
+			'name'        => $post->post_title,
+			'slug'        => $post->post_name,
+			'description' => $post->post_content,
+		);
+
+		$monster = new static( $monster );
+
+		$monster->post_id = $post->ID;
+
+		return $monster;
 
 	}
 

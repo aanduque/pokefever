@@ -23,8 +23,50 @@ final class Pokefever extends Container {
 
 		$this->boot_features();
 
+		$this->hooks();
+
 		do_action( 'pokefever_loaded' );
 
+	}
+
+	protected function hooks() {
+
+		add_action( 'template_redirect', array( $this, 'maybe_switch_providers' ) );
+
+	}
+
+	public function maybe_switch_providers() {
+
+		if ( is_post_type_archive() && in_array( get_post_type(), get_registered_post_types_slugs(), true ) ) {
+
+			$switched = $this->switch_current_provider( get_post_type() );
+
+			if ( $switched ) {
+
+				wp_safe_redirect( add_query_arg( 'switched', 1 ) );
+
+				exit;
+
+			}
+		}
+
+	}
+
+	protected function switch_current_provider( string $new_provider ) {
+
+		$current_provider = $this->get_current_provider();
+
+		if ( $current_provider === $new_provider ) {
+			return;
+		}
+
+		if ( is_user_logged_in() ) {
+			return update_user_meta( get_current_user_id(), 'pokefever_current_provider', $new_provider );
+		}
+
+			setcookie( 'pokefever_current_provider', $new_provider, time() + ( 86400 * 30 ) );
+
+			return true;
 	}
 
 	protected function register_validator() {
