@@ -167,6 +167,32 @@ API queries that we know won't change too frequently are also already being cach
 
 With all of those things already in place, we can easily scale our site by simply adding a persistent object cache, such as Redis, and a CDN, such as Cloudflare, Digital Ocean spaces, AWS, etc, to this installation.
 
+## Loom Sessions
+
+As I was developing this project, whenever possible, I recorded my screen and webcam using Loom (despite the fact tha Loom kept crashing on me, I still managed to record most of the sessions).
+You can find the recordings here (I should have done a better job of naming the videos, sorry about that):
+
+- Initial Layout <https://www.loom.com/share/ee03ab4a46b4492694c1501a81d9e64b>
+- Implementing /generate <https://www.loom.com/share/f08fc521533a499981477d924f47a9f3>
+- Implementing /random <https://www.loom.com/share/4ffb639a8fda415dbd2682314311e2dd>
+- <https://www.loom.com/share/17372703273849978571c3fb74ec9d14>
+- <https://www.loom.com/share/6fca8fbea66642eeb105421a9cc4037d>
+- <https://www.loom.com/share/9e6b535e17b7408cbf2725991b0b1595>
+- <https://www.loom.com/share/d905cf77718b4b96869159cf5b3e4092>
+- <https://www.loom.com/share/bfb39ab2aedb4cd883275cb4b462f229>
+- <https://www.loom.com/share/cef5f888dda9425997e81160417ddb75>
+- <https://www.loom.com/share/f7b24fd4941f4213bc5c3a386694614e>
+- <https://www.loom.com/share/f8ff006b86d440abb039299c401e7950>
+- <https://www.loom.com/share/f352d78419934e578860c1175a6b0440>
+- <https://www.loom.com/share/8047f8eb55b0423f9e87282565d9ce3f>
+- <https://www.loom.com/share/d67d48b05a1a4c2f98a78e7cba07f44c>
+- <https://www.loom.com/share/cb6eb162e17f454caefc0f0bdfe9a501>
+- <https://www.loom.com/share/9a9a3320f7724133bbaabef4502f6475>
+- <https://www.loom.com/share/1ade6047c495494b9295bde2a6cbd723>
+- <https://www.loom.com/share/822e34e8f53e4fd0bfe0a420297422b0>
+- <https://www.loom.com/share/133a3a70bf78436f912c76af24b3ba9f>
+- <https://www.loom.com/share/ee2034ab365c4727934008ec0952a3cd>
+
 ## License
 
 Copyright 2023 [Arindo Duque](https://arindoduque.com).
