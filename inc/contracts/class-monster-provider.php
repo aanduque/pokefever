@@ -7,6 +7,8 @@
 
 namespace Pokefever\Contracts;
 
+use Pokefever\Models\Monster;
+
 interface Monster_Provider {
 
 	/**
@@ -28,6 +30,6 @@ interface Monster_Provider {
 	 *
 	 * @return Monster
 	 */
-	public function generate();
+	public function generate() : Monster;
 
 }

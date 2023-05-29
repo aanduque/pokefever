@@ -3,12 +3,14 @@
 namespace Pokefever;
 
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
 use Illuminate\Validation\Factory;
 use League\ColorExtractor\ColorExtractor;
 use League\ColorExtractor\Palette;
 use League\ColorExtractor\Color;
+use LogicException;
 use Pokefever\Models\Monster;
 use function pf\container as app;
 
@@ -24,9 +26,8 @@ final class Pokefever extends Container {
 			)
 		);
 
-		// Register the default pokemon provider.
-		$this->register_provider( 'pokemon', new \Pokefever\Providers\Pokemon() );
-		$this->register_provider( 'digimon', new \Pokefever\Providers\Digimon() );
+		// Auto-injects the container inside the container.
+		$this->instance( 'app', $this );
 
 		// Boot the container.
 		$this->boot();
@@ -34,22 +35,63 @@ final class Pokefever extends Container {
 		self::init();
 	}
 
-	protected function boot() {
+	public function boot() {
 
-		// Registers the post types for each provider.
+		$this->load_features();
+
+		$this->boot_providers();
+
+		$this->boot_features();
+
+	}
+
+	protected function load_features() {
+
+		collect( $this->tagged( 'feature' ) )->each(
+			function( $feature ) {
+				$feature->register( $this );
+			}
+		);
+
+	}
+
+	protected function boot_features() {
+
+		collect( $this->tagged( 'feature' ) )
+			->filter(
+				function( $feature ) {
+					// Required features are always loaded.
+					if ( $feature instanceof Contracts\Feature ) {
+						return true;
+					}
+
+					return get_option( 'pokefever_feature_' . $feature->name(), true );
+				}
+			)
+			->each(
+				function( $feature ) {
+					$feature->boot( $this );
+				}
+			);
+
+	}
+
+	protected function boot_providers() {
+
 		foreach ( $this->get_providers() as $provider ) {
+
+			// Registers the post types for this provider.
 			list($post_type_slug, $post_type_args) = $provider->post_type();
 			register_post_type( $post_type_slug, $post_type_args );
-		}
 
-		// Registers the taxonomies for each provider.
-		foreach ( $this->get_providers() as $provider ) {
+			// Then, we register the taxonomies for this provider.
 			$taxonomies = $provider->taxonomies();
 			foreach ( $taxonomies as $taxonomy_slug => $taxonomy ) {
 				list($taxonomy_post_types, $taxonomy_args) = $taxonomy;
 				register_taxonomy( $taxonomy_slug, $taxonomy_post_types, $taxonomy_args );
 			}
 		}
+
 	}
 
 	public function get_default_provider() {
@@ -63,10 +105,59 @@ final class Pokefever extends Container {
 		return apply_filters( 'pokefever/providers/current', $this->get( $current_provider_key ), $this );
 	}
 
-	public function register_provider( string $provider_name, $provider ) {
-		$this->instance( $provider_name, $provider );
-		$this->tag( $provider_name, 'provider' );
+	/**
+	 * Allows us to register and tag instances in the container.
+	 *
+	 * @param string $key The container key to register the instance as.
+	 * @param mixed  $value The instance to register.
+	 * @param string $tag The tag to register the instance with.
+	 * @return $this
+	 */
+	protected function register_as( string $key, $value, string $tag ) {
+		$this->instance( $value::class, $value );
+
+		if ( $value::class !== $key ) {
+			$this->alias( $value::class, $key );
+		}
+
+		$this->tag( $key, $tag );
+
 		return $this;
+	}
+
+	/**
+	 * Registers a new feature in the container.
+	 *
+	 * @param Feature|Extra_Feature $feature The feature instance.
+	 * @return $this
+	 */
+	public function register_feature( $feature ) {
+		$feature_name = $feature::class;
+		return $this->register_as( $feature_name, $feature, 'feature' );
+	}
+
+	/**
+	 * Registers multiple features in the container.
+	 *
+	 * @param array<Feature|Extra_Feature> $features The features to register.
+	 * @return $this
+	 */
+	public function register_features( array $features ) {
+		foreach ( $features as $feature ) {
+			$this->register_feature( $feature );
+		}
+		return $this;
+	}
+
+	/**
+	 * Registers a new monster provider in the container.
+	 *
+	 * @param string $provider_name  The monster provider name. This is used as the container key.
+	 * @param mixed  $provider The provider instance.
+	 * @return $this
+	 */
+	public function register_provider( string $provider_name, $provider ) {
+		return $this->register_as( $provider_name, $provider, 'provider' );
 	}
 
 	public function get_providers() {

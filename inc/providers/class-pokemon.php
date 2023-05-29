@@ -94,7 +94,7 @@ class Pokemon implements Monster_Provider {
 	 *
 	 * @return Monster
 	 */
-	public function generate() {
+	public function generate() : Monster {
 		return new Monster(
 			array()
 		);

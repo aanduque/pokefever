@@ -1,108 +1,63 @@
 <?php
 /**
- * Understrap Child Theme functions and definitions
+ * The Pokefever theme's bootstrap file.
+ *
+ * This file is used to kick off the theme's functionality.
+ * It registers the required features of the challenge, as well as
+ * any optional features that I wanted to implement.
+ *
+ * Required features are located in inc/features/required.
+ * Optional features are located in inc/features/extra.
+ *
+ * Required features are always loaded.
+ * Optional features can be disabled inside the admin panel.
+ *
+ * @package Pokefever
  */
+
+use Pokefever\Features\Extra\Digimon;
+use Pokefever\Features\Required\Pokemon;
+use Pokefever\Features\Required\Understrap_Child;
+use function pf\container as app;
 
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Require the Composer autoloader.
+ */
 require_once __DIR__ . '/vendor/autoload.php';
 
 /**
+ * Register the features required by the challenge.
+ */
+app()->register_features(
+	array(
+		new Pokemon(), // Adds the main functionality regarding the Pokemon API.
+	)
+);
+
+/**
+ * Register the challenge's optional features that I wanted to implement,
+ * as well as extra features I added to make the app more interesting.
+ */
+app()->register_features(
+	array(
+		new Digimon(), // Adds the Digimon API as an example of how to add more monster providers.
+	)
+);
+
+/**
+ * Add other features that I used to consolidate logic that would otherwise
+ * pollute the functions.php file.
+ */
+app()->register_features(
+	array(
+		new Understrap_Child(), // Adds the child theme logic that came with the Understrap theme.
+	)
+);
+
+/**
  * Initialize the theme main class.
- *
- * @since 0.0.1
  */
-add_action( 'after_setup_theme', 'pf\\container' );
-
-/**
- * Removes the parent themes stylesheet and scripts from inc/enqueue.php
- */
-function understrap_remove_scripts() {
-	wp_dequeue_style( 'understrap-styles' );
-	wp_deregister_style( 'understrap-styles' );
-
-	wp_dequeue_script( 'understrap-scripts' );
-	wp_deregister_script( 'understrap-scripts' );
-}
-add_action( 'wp_enqueue_scripts', 'understrap_remove_scripts', 20 );
-
-/**
- * Enqueue our stylesheet and javascript file
- */
-function theme_enqueue_styles() {
-	// Get the theme data .
-	$the_theme     = wp_get_theme();
-	$theme_version = $the_theme->get( 'Version' );
-
-	$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-	// Grab asset urls .
-	$theme_styles  = "/css/child-theme{$suffix}.css";
-	$theme_scripts = "/js/child-theme{$suffix}.js";
-
-	$css_version = $theme_version . '.' . filemtime( get_stylesheet_directory() . $theme_styles );
-
-	wp_enqueue_style( 'child-understrap-styles', get_stylesheet_directory_uri() . $theme_styles, array(), $css_version );
-	wp_enqueue_script( 'jquery' );
-
-	$js_version = $theme_version . '.' . filemtime( get_stylesheet_directory() . $theme_scripts );
-
-	wp_register_script( 'child-understrap-scripts', get_stylesheet_directory_uri() . $theme_scripts, array(), $js_version );
-
-	wp_localize_script(
-		'child-understrap-scripts',
-		'pokefever',
-		array(
-			'ajax_url'        => admin_url( 'admin-ajax.php' ),
-			'nonce'           => wp_create_nonce( 'pokefever-nonce' ),
-			'current_post_id' => get_the_ID(),
-			'messages'        => array(
-				'403' => __( 'Failed to fetch data.', 'pokerfever' ),
-				'404' => __( 'Old Pokedex entry not found.', 'pokerfever' ),
-				'500' => __( 'Something went wrong.', 'pokerfever' ),
-			),
-		)
-	);
-
-	wp_enqueue_script( 'child-understrap-scripts' );
-
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-		wp_enqueue_script( 'comment-reply' );
-	}
-}
-add_action( 'wp_enqueue_scripts', 'theme_enqueue_styles' );
-
-/**
- * Load the child theme's text domain
- */
-function add_child_theme_textdomain() {
-	load_child_theme_textdomain( 'understrap-child', get_stylesheet_directory() . '/languages' );
-}
-add_action( 'after_setup_theme', 'add_child_theme_textdomain' );
-
-/**
- * Overrides the theme_mod to default to Bootstrap 5
- *
- * This function uses the `theme_mod_{$name}` hook and
- * can be duplicated to override other theme settings.
- *
- * @return string
- */
-function understrap_default_bootstrap_version() {
-	return 'bootstrap5';
-}
-add_filter( 'theme_mod_understrap_bootstrap_version', 'understrap_default_bootstrap_version', 20 );
-
-/**
- * Loads javascript for showing customizer warning dialog.
- */
-function understrap_child_customize_controls_js() {
-	wp_enqueue_script(
-		'understrap_child_customizer',
-		get_stylesheet_directory_uri() . '/js/customizer-controls.js',
-		array( 'customize-preview' ),
-		'20130508',
-		true
-	);
-}
-add_action( 'customize_controls_enqueue_scripts', 'understrap_child_customize_controls_js' );
+add_action( 'after_setup_theme', array( app(), 'boot' ) );
