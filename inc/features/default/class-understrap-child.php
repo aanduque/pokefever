@@ -1,14 +1,39 @@
 <?php
+/**
+ * The Random Endpoint.
+ *
+ * @package Pokefever
+ */
 
 namespace Pokefever\Features\Required;
 
 use Pokefever\Contracts\Feature;
 use Pokefever\Pokefever;
 
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class Understrap_Child
+ *
+ * @package Pokefever\Features\Required
+ */
 class Understrap_Child implements Feature {
 
+	/**
+	 * Register the feature.
+	 *
+	 * @param Pokefever $app The container instance.
+	 * @return void
+	 */
 	public function register( Pokefever $app ): void { }
 
+	/**
+	 * Boot the feature.
+	 *
+	 * @param Pokefever $app The container instance.
+	 * @return void
+	 */
 	public function boot( Pokefever $app ): void {
 
 		add_action( 'wp_enqueue_scripts', array( $this, 'understrap_remove_scripts' ), 20 );
@@ -24,7 +49,7 @@ class Understrap_Child implements Feature {
 	}
 
 	/**
-	 * Removes the parent themes stylesheet and scripts from inc/enqueue.php
+	 * Removes the parent themes stylesheet and scripts from inc/enqueue.php.
 	 */
 	public function understrap_remove_scripts() {
 		wp_dequeue_style( 'understrap-styles' );
@@ -65,9 +90,9 @@ class Understrap_Child implements Feature {
 				'nonce'           => wp_create_nonce( 'pokefever-nonce' ),
 				'current_post_id' => get_the_ID(),
 				'messages'        => array(
-					'403' => __( 'Failed to fetch data.', 'pokerfever' ),
-					'404' => __( 'Old Pokedex entry not found.', 'pokerfever' ),
-					'500' => __( 'Something went wrong.', 'pokerfever' ),
+					'403' => __( 'Failed to fetch data.', 'pokefever' ),
+					'404' => __( 'Old Pokedex entry not found.', 'pokefever' ),
+					'500' => __( 'Something went wrong.', 'pokefever' ),
 				),
 			)
 		);

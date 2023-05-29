@@ -1,15 +1,36 @@
 <?php
+/**
+ * The template for displaying search results pages.
+ *
+ * @package Pokefever
+ */
 
 namespace Pokefever\Features\Required;
 
+use LogicException;
 use Pokefever\Contracts\Feature;
 use Pokefever\Pokefever;
 use Pokefever\Providers\Pokemon as Pokemon_Provider;
+use TypeError;
 
 use function Pokefever\get_monster_attribute;
 
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class Pokemon.
+ *
+ * @package Pokefever\Features\Required
+ */
 class Pokemon implements Feature {
 
+	/**
+	 * Registers the Pokémon monster provider.
+	 *
+	 * @param Pokefever $app The container instance.
+	 * @return void
+	 */
 	public function register( Pokefever $app ): void {
 
 		/**
@@ -19,6 +40,12 @@ class Pokemon implements Feature {
 
 	}
 
+	/**
+	 * Boot the feature.
+	 *
+	 * @param Pokefever $app The container instance.
+	 * @return void
+	 */
 	public function boot( Pokefever $app ): void {
 
 		add_action( 'wp_ajax_load_oldest_pokedex_number', array( $this, 'load_oldest_pokedex_number_callback' ) );
@@ -35,7 +62,13 @@ class Pokemon implements Feature {
 
 	}
 
+	/**
+	 * Load the oldest pokedex number for a monster.
+	 *
+	 * @return void
+	 */
 	public function load_oldest_pokedex_number_callback() {
+
 		check_ajax_referer( 'pokefever-nonce' );
 
 		$post_id = absint( wp_unslash( $_POST['post_id'] ?? '' ) );
@@ -57,6 +90,7 @@ class Pokemon implements Feature {
 		}
 
 		exit;
+
 	}
 
 }

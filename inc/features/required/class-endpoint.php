@@ -1,4 +1,9 @@
 <?php
+/**
+ * The template for displaying search results pages.
+ *
+ * @package Pokefever
+ */
 
 namespace Pokefever\Features\Required;
 
@@ -7,6 +12,14 @@ use Pokefever\Contracts\Monster_Provider;
 use Pokefever\Pokefever;
 use function Pokefever\container as app;
 
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class Endpoint
+ *
+ * @package Pokefever\Features\Required
+ */
 abstract class Endpoint implements Feature {
 
 	/**
@@ -92,6 +105,12 @@ abstract class Endpoint implements Feature {
 
 	}
 
+	/**
+	 * Register things on the container.
+	 *
+	 * @param Pokefever $app The container instance.
+	 * @return void
+	 */
 	public function register( Pokefever $app ): void {}
 
 }
