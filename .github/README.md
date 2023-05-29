@@ -42,6 +42,7 @@ docker-compose up -d
 #### You're ready
 
 You should now be able to access the site at <http://localhost:8000>
+**Note:** If this is your first run, you might need to wait a few seconds for the database to be created and populated, the themes to be installed and the site to be configured.
 The `admin` username is `admin` and the password is `admin`.
 
 ## Objectives
