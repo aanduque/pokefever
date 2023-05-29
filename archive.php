@@ -97,7 +97,7 @@ use Pokefever\Pokefever;
 
 <div class="mt-4">
 
-				<?php get_template_part( 'template-parts/archive-pagination' ); ?>
+	<?php get_template_part( 'template-parts/archive-pagination' ); ?>
 
 </div>
 

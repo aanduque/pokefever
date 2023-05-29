@@ -11,16 +11,16 @@ use Pokefever\Contracts\Monster_Provider;
 use Pokefever\Models\Monster;
 
 /**
- * The Pokémon monster provider.
+ * The Digimon monster provider.
  */
-class Pokemon implements Monster_Provider {
+class Digimon implements Monster_Provider {
 
 	public function name() {
-		return 'Pokémon';
+		return __( 'Digimon', 'pokefever' );
 	}
 
 	public function description() {
-		return __( 'Pokémon are creatures of all shapes and sizes who live in the wild or alongside humans.', 'pokefever' );
+		return __( 'Digimon are creatures that inhabit the Digital World, a virtual space created by humanity\'s various communication networks and their developers.', 'pokefever' );
 	}
 
 	public function cover_image() {
@@ -33,7 +33,7 @@ class Pokemon implements Monster_Provider {
 	 * @return string
 	 */
 	public function post_type_slug() {
-		return 'pokemon';
+		return 'digimon';
 	}
 
 	/**
@@ -55,7 +55,7 @@ class Pokemon implements Monster_Provider {
 				'rewrite'      => array( 'slug' => $this->post_type_slug() ),
 				'show_in_rest' => false,
 				'supports'     => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ),
-				'menu_icon'    => 'dashicons-share-alt',
+				'menu_icon'    => 'dashicons-admin-site-alt3',
 			),
 		);
 	}
