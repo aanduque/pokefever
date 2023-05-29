@@ -39,7 +39,7 @@ services:
         echo 'Wait for 15 seconds before attempting to install...'
         sleep 20 ;
         docker exec -t pokefever wp core install --path=/var/www/html --url='http://localhost:8000' --title='Pokefever' --admin_user=admin --admin_password=admin --admin_email='admin@example.com' --allow-root ; 
-        docker exec -t pokefever chmod -R 777 /var/www/html/wp-content ; 
+        docker exec -t pokefever chmod -R 777 /var/www/html/wp-content/uploads ; 
         docker exec -t pokefever wp theme install understrap --allow-root ; 
         docker exec -t pokefever wp theme activate pokefever --allow-root ;
         docker exec -t pokefever wp rewrite structure '/%postname%/' --allow-root"
