@@ -9,27 +9,32 @@ Technical challenge for Fever.
 This repository ships with a Docker setup to get you up-and-running as soon as possible.
 To setup a local environment to test this out, follow the steps below:
 
-### Clone this repository into your local machine.
+### Requirements
+
+- You must have Docker and Docker Compose installed on your machine.
+- You must have a local installation of PHP 8.1 or higher.
+
+#### Clone this repository into your local machine.
 
 ```git clone https://github.com/aanduque/pokefever.git```
 
-### Install composer dependencies
+#### Install composer dependencies
 
 ```composer install```
 
-### Install node dependencies
+#### Install node dependencies
 
 ```yarn install```
 
-### Build the theme
+#### Build the theme
 
 ```yarn build```
 
-### Start the docker containers
+#### Start the docker containers
 
 ```docker-compose up -d```
 
-### You're ready
+#### You're ready
 
 You should now be able to access the site at <http://localhost:8000>
 The `admin` username is `admin` and the password is `admin`.
