@@ -33,12 +33,6 @@ composer install
 yarn install
 ```
 
-#### Build the theme
-
-```bash
-yarn build
-```
-
 #### Start the docker containers
 
 ```bash
