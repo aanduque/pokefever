@@ -25,36 +25,57 @@ The requirements, as laid out by the document received, are listed below. I've t
 
 - [X] Create a custom post type called “Pokémon” whose slug should be “pokemon”.
 - [X] This post type must contain the following properties:
-    1. Photo of the pokemon;
-    2. Pokemon name;
-    3. pokemon description;
-    4. Primary and secondary type of pokemon;
-    5. Pokemon weight;
-    6. Pokedex number in older version of the game (you can find this info in the api);
-    7. Pokedex number in the most recent version of the game (you can find this info in the api);
-    8. (Optional) The attacks of said pokémon with its short description (in English). Said attacks must be stored as desired, considering efficiency and possible reuse;
+  - [X] Photo of the pokemon;
+  - [X] Pokemon name;
+  - [X] pokemon description;
+  - [X] Primary and secondary type of pokemon;
+  - [X] Pokemon weight;
+  - [X] Pokedex number in older version of the game (you can find this info in the api);
+  - [X] Pokedex number in the most recent version of the game (you can find this info in the api);
+  - [X] _(Optional)_ The attacks of said pokémon with its short description (in English). Said attacks must be stored as desired, considering efficiency and possible reuse;
+- [X] Generate 3 pokemon manually with the data requested in point 2 using the PokéAPI.
+- [X] Create a template for the custom post type "pokemon" and display:
+  - [X] Photo of the pokemon
+  - [X] Pokemon name
+  - [X] Pokemon description
+  - [X] Pokémon types (primary and secondary)
+  - [X] Number of the pokedex in the most recent version and the name of the game
+  - [X] Button in which, when clicked, an AJAX call is made to WordPress to show the number of the pokedex of said pokemon in the oldest version of the game with the name of said version.
+  - [X] Table of movements of the pokemon with two columns: movement name and movement description
 
-#### Notes on itens 1 and 2
+## Notes
 
-No surprises on this itens. As you'll see during the code review, the piece in charge of creating the custom post types and the associated taxonomies is the main theme class `Pokefever\Pokefever`, based on whatever post types are being described by each provider.
+### Items 1, 2 and 3
 
-As we'll elaborate later, the code is designed to support multiple "monster" providers. We have added the `Pokemon` and started to implement the `Digimon` provider as well.
+> Create a custom post type called “Pokémon” whose slug should be “pokemon”.
+>
+> This post type must contain the following properties [...]
+>
+> Create 3 pokemon manually with the data requested in point 2 using the PokéAPI.
 
-Adding new providers is as simple as creating a new class that implements the `Pokefever\Contracts\Monster_Provider` contract and implementing the required methods. 
+No surprises on these items.
+
+As you'll see during the code review, the piece in charge of creating the custom post types and the associated taxonomies is the main theme class `Pokefever\Pokefever`, based on whatever post types are being described by each provider.
+
+The code is designed to support multiple "monster" providers. We have added the `Pokemon` and started to implement the `Digimon` provider as well.
+
+Adding new providers is as simple as creating a new class that implements the `Pokefever\Contracts\Monster_Provider` contract and implementing the required methods.
 
 Then, we just need to make sure we register the provider using the `Pokefever\Pokefever::register_provider` method in one of our registered features.
 
 It sound more complicated than it is, but it's actually pretty simple. We'll elaborate more on this later.
 
-- [ ] Generate 3 pokemon manually with the data requested in point 2 using the PokéAPI.
-- [ ] Create a template for the custom post type "pokemon" and display:
-    1. Photo of the pokemon
-    2. Pokemon name
-    3. c. Pokemon description
-    4. Pokémon types (primary and secondary)
-    5. Number of the pokedex in the most recent version and the name of the game
-    6. Button in which, when clicked, an AJAX call is made to WordPress to show the number of the pokédex of said pokémon in the oldest version of the game with the name of said version.
-    7. g. Table of movements of the pokémon with two columns: movement name and movement description
+I have to admit that the I was not entirely sure on how to make sure I've completed the third requirement (item 3) on the list, as it sounds like a preparation step that I'd only do it during the first steps of working on the implementation.
+
+### Item 4
+
+> Create a template for the custom post type "pokemon" and display [...]
+
+This was done using the `single.php` template file.
+
+Initially, I had a `single-pokemon.php` template file, but I decided to use the `single.php` template file instead, as it's more generic and it allows us to use the same template for all the different monster providers.
+
+My assumption is that the different monster providers will have different post types, but they will all share the same template, and that this "site/app" will not host regular posts or pages. Even if that was the case, though, new single templates could be added to the theme to support them (e.g. `single-post.php`, `single-page.php`, etc), while the default `single.php` template would be used for the monster providers only.
 
 ### Optional
 
