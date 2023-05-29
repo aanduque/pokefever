@@ -23,16 +23,29 @@ The requirements, as laid out by the document received, are listed below. I've t
 
 ### Required
 
-- [ ] Create a custom post type called “Pokémon” whose slug should be “pokemon”.
-- [ ] This post type must contain the following properties:
-a. Photo of the pokemon
-b. pokemon name
-c. pokemon description
-d. primary and secondary type of pokemon
-e. pokemon weight
-f. Pokedex number in older version of the game (you can find this info in the api)
-g. Pokedex number in the most recent version of the game (you can find this info in the api)
-h. (Optional) The attacks of said pokémon with its short description (in English). Said attacks must be stored as desired, considering efficiency and possible reuse.
+- [X] Create a custom post type called “Pokémon” whose slug should be “pokemon”.
+- [X] This post type must contain the following properties:
+    1. Photo of the pokemon;
+    2. Pokemon name;
+    3. pokemon description;
+    4. Primary and secondary type of pokemon;
+    5. Pokemon weight;
+    6. Pokedex number in older version of the game (you can find this info in the api);
+    7. Pokedex number in the most recent version of the game (you can find this info in the api);
+    8. (Optional) The attacks of said pokémon with its short description (in English). Said attacks must be stored as desired, considering efficiency and possible reuse;
+
+#### Notes on itens 1 and 2
+
+No surprises on this itens. As you'll see during the code review, the piece in charge of creating the custom post types and the associated taxonomies is the main theme class `Pokefever\Pokefever`, based on whatever post types are being described by each provider.
+
+As we'll elaborate later, the code is designed to support multiple "monster" providers. We have added the `Pokemon` and started to implement the `Digimon` provider as well.
+
+Adding new providers is as simple as creating a new class that implements the `Pokefever\Contracts\Monster_Provider` contract and implementing the required methods. 
+
+Then, we just need to make sure we register the provider using the `Pokefever\Pokefever::register_provider` method in one of our registered features.
+
+It sound more complicated than it is, but it's actually pretty simple. We'll elaborate more on this later.
+
 - [ ] Generate 3 pokemon manually with the data requested in point 2 using the PokéAPI.
 - [ ] Create a template for the custom post type "pokemon" and display:
     1. Photo of the pokemon
