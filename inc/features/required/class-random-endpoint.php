@@ -28,6 +28,17 @@ class Random_Endpoint extends Endpoint {
 	}
 
 	/**
+	 * Test to check if the current user can access this endpoint.
+	 *
+	 * @return bool
+	 */
+	public function check_permissions() : bool {
+
+		return true;
+
+	}
+
+	/**
 	 * Gets a random monster from the database and redirects to its page.
 	 *
 	 * @param Monster_Provider $provider The monster provider instance.
@@ -45,7 +56,8 @@ class Random_Endpoint extends Endpoint {
 		);
 
 		if ( ! $monster ) {
-			wp_die( sprintf( __( 'No %s found.', 'pokefever' ), $provider->name() ) );
+			// translators: %s is the name of the monster provider.
+			wp_die( esc_html( sprintf( __( 'No %s found.', 'pokefever' ), $provider->name() ) ) );
 		}
 
 		// Redirect to the pokemon's page.

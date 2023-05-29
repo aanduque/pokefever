@@ -1,6 +1,6 @@
 <?php
 /**
- * Feature interface.
+ * Extra Feature interface.
  *
  * Gives us an easy way to add and control new features, while also
  * allowing us to display controls to turn them on and off, when needed.

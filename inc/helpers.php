@@ -17,7 +17,7 @@ use function paginate_links as wp_paginate_links;
  * @return Pokerfever
  */
 function container() {
-	return Pokefever::getInstance()->get( 'app' );
+	return Pokefever::getInstance();
 }
 
 /**

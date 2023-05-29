@@ -28,6 +28,17 @@ class Generate_Endpoint extends Endpoint {
 	}
 
 	/**
+	 * Test to check if the current user can access this endpoint.
+	 *
+	 * @return bool
+	 */
+	public function check_permissions() : bool {
+
+		return current_user_can( 'edit_posts' );
+
+	}
+
+	/**
 	 * Generates and saves a monster, redirecting to the permalink on success.
 	 *
 	 * @param Monster_Provider $provider The monster provider instance.

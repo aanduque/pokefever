@@ -23,12 +23,20 @@ class Pokemon implements Feature {
 
 		add_action( 'wp_ajax_nopriv_load_oldest_pokedex_number', array( $this, 'load_oldest_pokedex_number_callback' ) );
 
+		add_filter(
+			'wp_get_object_terms_args',
+			function( $args ) {
+				$args['orderby'] = 'term_order';
+				return $args;
+			}
+		);
+
 	}
 
 	public function load_oldest_pokedex_number_callback() {
 		check_ajax_referer( 'pokefever-nonce' );
 
-		$post_id = absint(wp_unslash( $_POST['post_id'] ));
+		$post_id = absint( wp_unslash( $_POST['post_id'] ) );
 
 		$pokedex_number_oldest = get_post_meta( $post_id, 'pokemon_pokedex_entry_number_oldest', true );
 

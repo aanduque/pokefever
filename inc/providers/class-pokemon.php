@@ -83,9 +83,18 @@ class Pokemon implements Monster_Provider {
 	 * @return array<string, array>
 	 */
 	public function taxonomies() {
+
 		$taxonomies = array();
 
-		// Add the Pokémon type taxonomy.
+		/**
+		 * Describes the Pokémon type taxonomy.
+		 *
+		 * We are using the Pokémon type taxonomy to categorize the Pokémon by their type.
+		 * Taxonomies are known data structures in WordPress, which means that by choosing
+		 * to use a taxonomy instead of a custom field, we are making it easier for other
+		 * developers to understand our code, as well as making it easier for other plugins
+		 * to interact with our data (caching plugins, SEO plugins, etc.)
+		 */
 		$taxonomies['pokemon_type'] = array(
 			'pokemon',
 			array(
@@ -94,7 +103,9 @@ class Pokemon implements Monster_Provider {
 			),
 		);
 
-		// Add the Pokémon move taxonomy.
+		/**
+		 * Describe the Pokémon move taxonomy.
+		 */
 		$taxonomies['pokemon_move'] = array(
 			'pokemon',
 			array(
@@ -104,6 +115,7 @@ class Pokemon implements Monster_Provider {
 		);
 
 		return $taxonomies;
+
 	}
 
 	/**
@@ -128,9 +140,37 @@ class Pokemon implements Monster_Provider {
 		return $saved_api_ids;
 	}
 
+	/**
+	 * Returns the total number of pokemon available on the API.
+	 *
+	 * This is used to generate a random pokemon id. The results of this API call are cached
+	 * for 5 minutes, to avoid hitting the API too much unnecessarily
+	 *
+	 * @return int
+	 */
 	protected function get_total_number_of_api_ids(): int {
 
-		return 1281; // TODO: grab this value from the api and save it to a transient.
+		$total_pokemon = get_transient( 'pokefever_total_pokemon' );
+
+		if ( false === $total_pokemon ) {
+
+			try {
+
+				$total_pokemon = Util::call_api( 'https://pokeapi.co/api/v2/pokemon-species' )->count;
+
+				set_transient( 'pokefever_total_pokemon', $total_pokemon, 5 * MINUTE_IN_SECONDS );
+
+			} catch ( \Throwable $th ) {
+
+				/**
+				 * As an extra measure, we have a fallback with the latest known value.
+				 */
+				$total_pokemon = 1010;
+
+			}
+		}
+
+		return $total_pokemon;
 
 	}
 
@@ -187,6 +227,12 @@ class Pokemon implements Monster_Provider {
 			 * Most specifically, we need to get the pokemon's species data from the /pokemon-species endpoint.
 			 */
 			$pokemon_data = Util::call_api( "https://pokeapi.co/api/v2/pokemon/{$random_pokemon_id}" );
+
+			if (! ($pokemon_data->species->url ?? null ) ) {
+
+				dd($random_pokemon_id, $pokemon_data);
+
+			}
 
 			/**
 			 * Now, get the pokemon's species data from the API /pokemon-species endpoint.
@@ -386,6 +432,7 @@ class Pokemon implements Monster_Provider {
 	 * @return string
 	 */
 	public function get_localized_text( $available_descriptions, $attribute_name = 'flavor_text', $language = 'en' ) {
+
 		$localized_text = collect( $available_descriptions )->filter(
 			function( $text_variation ) use ( $language ) {
 				return $language === $text_variation->language->name;
@@ -393,6 +440,7 @@ class Pokemon implements Monster_Provider {
 		)->first()->{$attribute_name} ?? __( 'No description available.', 'pokefever' );
 
 		return str_replace( "\n", ' ', $localized_text );
+
 	}
 
 }

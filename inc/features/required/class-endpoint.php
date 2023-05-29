@@ -20,6 +20,13 @@ abstract class Endpoint implements Feature {
 	abstract public function path(): string;
 
 	/**
+	 * Test to check if the current user can access this endpoint.
+	 *
+	 * @return bool
+	 */
+	abstract public function check_permissions(): bool;
+
+	/**
 	 * Handle the endpoint request.
 	 *
 	 * This handler is only performed if the request matches the endpoint path.
@@ -56,6 +63,7 @@ abstract class Endpoint implements Feature {
 	 * @return void
 	 */
 	public function maybe_handle() {
+
 		global $wp_query;
 
 		/**
@@ -63,6 +71,16 @@ abstract class Endpoint implements Feature {
 		 */
 		if ( $wp_query->get( 'name' ) !== $this->path() ) {
 			return;
+		}
+
+		/**
+		 * Check if the current user has the right permissions to access
+		 * this endpoint.
+		 */
+		if ( ! $this->check_permissions() ) {
+
+			wp_die( esc_html( __( 'You do not have permission to access this page.', 'pokefever' ) ) );
+
 		}
 
 		/**

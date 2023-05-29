@@ -11,7 +11,24 @@ use Pokefever\Providers\Pokemon;
 
 final class Pokefever extends Container {
 
-	protected function __construct() {
+	public function boot() {
+
+		do_action( 'pokefever_init' );
+
+		$this->register_validator();
+
+		$this->load_features();
+
+		$this->boot_providers();
+
+		$this->boot_features();
+
+		do_action( 'pokefever_loaded' );
+
+	}
+
+	protected function register_validator() {
+
 		// Sets up the validator instance.
 		$this->instance(
 			'validator',
@@ -20,23 +37,6 @@ final class Pokefever extends Container {
 				$this,
 			)
 		);
-
-		// Auto-injects the container inside the container.
-		$this->instance( 'app', $this );
-
-		// Boot the container.
-		$this->boot();
-
-		self::init();
-	}
-
-	public function boot() {
-
-		$this->load_features();
-
-		$this->boot_providers();
-
-		$this->boot_features();
 
 	}
 
@@ -109,6 +109,8 @@ final class Pokefever extends Container {
 		// get the current provider key saved on the cookie, if the user is not logged in or in the user meta, if the user is logged in.
 		$current_provider_key = get_current_user_id() ? get_user_meta( get_current_user_id(), 'pokefever_current_provider', true ) : ( $_COOKIE['pokefever_current_provider'] ?? $this->get_default_provider() );
 
+		$current_provider_key = $current_provider_key ? $current_provider_key : $this->get_default_provider();
+
 		return apply_filters( 'pokefever/providers/current', $current_provider_key, $this );
 	}
 
@@ -169,19 +171,5 @@ final class Pokefever extends Container {
 	public function get_providers() {
 		return $this->tagged( 'provider' );
 	}
-
-	public static function init() {
-
-		add_filter(
-			'wp_get_object_terms_args',
-			function( $args ) {
-				$args['orderby'] = 'term_order';
-				return $args;
-			}
-		);
-
-		do_action( 'pokefever_loaded' );
-	}
-
 
 }

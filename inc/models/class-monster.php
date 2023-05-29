@@ -227,7 +227,9 @@ class Monster {
 				 */
 				collect( $color_names )->each(
 					function( $color_name ) use ( $colors ) {
-						update_post_meta( $this->post_id, "{$color_name}_color", $colors[ $color_name ] );
+						if ( isset( $colors[ $color_name ] ) ) {
+							update_post_meta( $this->post_id, "{$color_name}_color", $colors[ $color_name ] );
+						}
 					}
 				);
 

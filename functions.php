@@ -32,13 +32,62 @@ defined( 'ABSPATH' ) || exit;
 require_once __DIR__ . '/vendor/autoload.php';
 
 /**
- * Register the features required by the challenge.
+ * Register the features described by the challenge.
+ *
+ * In order to make sure our code is manageable in the long run, I decided to
+ * use the Illuminate Container to manage the application's dependencies.
+ *
+ * This allows us to register features and providers in a way that is easy to
+ * maintain and extend, and even replace.
+ *
+ * I also decided to use the Illuminate Validation package to validate the fields
+ * passed to the Monster model class.
+ *
+ * @see inc/helpers.php
+ *
+ * @link https://packagist.org/packages/illuminate/container
+ * @link https://packagist.org/packages/illuminate/validation
  */
 app()->register_features(
 	array(
-		Pokemon::class, // Adds the main functionality regarding the Pokemon API.
-		Generate_Endpoint::class, // Adds the /generate endpoint.
-		Random_Endpoint::class, // Adds the /random endpoint.
+
+		/**
+		 * Adds the Pokemon API as the default monster provider.
+		 *
+		 * This project was built in a way that multiple monster providers can be used.
+		 * Below, I added the Digimon API as an example of how to add more monster providers.
+		 *
+		 * This covers itens 1 and 2 of the challenge.
+		 *
+		 * @see inc/features/required/class-pokemon.php
+		 */
+		Pokemon::class,
+
+		/**
+		 * Adds the /generate endpoint, with permission checking.
+		 *
+		 * This covers item 7 of the challenge.
+		 *
+		 * @see inc/features/required/class-generate-endpoint.php
+		 */
+		Generate_Endpoint::class,
+
+		/**
+		* Adds the /random endpoint.
+		*
+		* This covers item 6 of the challenge.
+		*
+		* @see inc/features/required/class-random-endpoint.php
+		*/
+		Random_Endpoint::class,
+
+		/**
+		 * Adds the frontend customizations.
+		 *
+		 * This aids in covering item 4 of the challenge.
+		 *
+		 * @see inc/features/required/class-frontend-customizations.php
+		 */
 		Frontend_Customizations::class, // Adds the frontend customizations.
 	)
 );
@@ -49,7 +98,17 @@ app()->register_features(
  */
 app()->register_features(
 	array(
-		Digimon::class, // Adds the Digimon API as an example of how to add more monster providers.
+
+		/**
+		 * Adds the Digimon API as an example of how to add more monster providers.
+		 *
+		 * This starts the process of demonstrating how to do what was described
+		 * in item 9 of the challenge.
+		 *
+		 * @see inc/features/extra/class-digimon.php
+		 */
+		Digimon::class,
+
 	)
 );
 
@@ -59,7 +118,19 @@ app()->register_features(
  */
 app()->register_features(
 	array(
-		Understrap_Child::class, // Adds the child theme logic that came with the Understrap theme.
+
+		/**
+		 * The understrap child theme had some logic that I wanted to consolidate
+		 * in a separate class, outside of the functions.php file, so we could have
+		 * a cleaner file.
+		 *
+		 * That logic was moved into the Feature paradigm I created for this project,
+		 * in the Understrap_Child class.
+		 *
+		 * @see inc/features/required/class-understrap-child.php
+		 */
+		Understrap_Child::class,
+
 	)
 );
 
