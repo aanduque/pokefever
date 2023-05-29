@@ -47,12 +47,12 @@ I've also added a few comments of my own for each items, with [Notes](#notes) ex
 
 ### Optional
 
-- [X] Create a pokémon filter (TypeScript): Initially, this page will show a grid with the photos of the pokémon stored in the database. The user must be able to filter by type (the first 5 types returned by PokéAPI). When a filter is selected it should hide the photos of the pokemon whose first or second type does not match the selected filter. Limit to 6 pokemon per page.
-- [X] Create a custom url (for example http:/localhost/random) that shows a random pokémon stored in the database. Said URL must redirect to the permanent link of the returned pokémon.
-- [X] Create a custom url (for example <http://localhost/generate>) that when summoned will spawn a random pokemon by calling the PokéAPI. It can only be invoked by users who have post creation permissions or higher. This generated pokemon must be stored in WordPress as if it were a manually created post with the same data specified in point 2.
-- [X] Using the Wordpress REST API, generate an endpoint to list stored pokémon showing as ID the pokédex number in the most recent version of the game. Generate another endpoint to consult the data of the pokemon requested in point 2 in JSON format.
-- [X] Would it be possible to implement DAPI (or other similar APIs) in the developed solution? If so, what changes and abstractions would you propose in the different layers of the application to facilitate said integration? (the implementation is optional)
-- [X] The instance becomes more and more popular and starts receiving a lot of traffic generating heavy db usage. What would you do in this situation?
+- [X] Create a pokémon filter (TypeScript): Initially, this page will show a grid with the photos of the pokémon stored in the database. The user must be able to filter by type (the first 5 types returned by PokéAPI). When a filter is selected it should hide the photos of the pokemon whose first or second type does not match the selected filter. Limit to 6 pokemon per page. [Notes](#item-5)
+- [X] Create a custom url (for example <http::/localhost/random>) that shows a random pokémon stored in the database. Said URL must redirect to the permanent link of the returned pokémon. [Notes](#items-6-and-7)
+- [X] Create a custom url (for example <http://localhost/generate>) that when summoned will spawn a random pokemon by calling the PokéAPI. It can only be invoked by users who have post creation permissions or higher. This generated pokemon must be stored in WordPress as if it were a manually created post with the same data specified in point 2. [Notes](#items-6-and-7)
+- [ ] Using the Wordpress REST API, generate an endpoint to list stored pokémon showing as ID the pokédex number in the most recent version of the game. Generate another endpoint to consult the data of the pokemon requested in point 2 in JSON format. [Notes](#item-8)
+- [X] Would it be possible to implement DAPI (or other similar APIs) in the developed solution? If so, what changes and abstractions would you propose in the different layers of the application to facilitate said integration? (the implementation is optional) [Notes](#item-9)
+- [X] The instance becomes more and more popular and starts receiving a lot of traffic generating heavy db usage. What would you do in this situation? [Notes](#item-10)
 
 ## Notes
 
@@ -118,31 +118,54 @@ One advantage of this approach is that we don't need to worry about the markup o
 
 Another one is that it makes the filter function work even if JavaScript is disabled on the browser, as it will simply default to the default behavior of the form submission.
 
-## Other notes
+### Items 6 and 7
 
-Full documentation for this starter theme is available at [docs.understrap.com](https://docs.understrap.com).
+This was implemented as a base feature class - `Pokefever\Features\Endpoint` - that is extended by two other classes - `Pokefever\Features\Required\Generate_Endpoint` and `Pokefever\Features\Required\Random_Endpoint` - that are in charge of handling the two cases described on the items.
 
-## Possible questions
+The base class is responsible for registering the endpoint and the callback function that will handle the request.
+The handle is called through the container, which is responsible for resolving the dependencies of the method. This allows us, for example, to make sure the handle method is always using the correct provider, even if we decide to change the provider in the future, or the user changes the provider they're seeing on the site (by navigating to a different archive page).
 
-For support requests and bugs, we recommend browsing our issues [here (parent theme)](https://github.com/understrap/understrap/issues) and [here (child theme)](https://github.com/understrap/understrap-child/issues) and opening a new issue if necessary. For more broad discussion, like questions about the roadmap, visit our [discussion board](https://github.com/understrap/understrap/discussions).
+#### Item 8
 
-## Features
+If I had more time, I would expand the base endpoint class to add support to registering REST_API routes using the same logic. This would allow us to easily register the endpoints described on item 8.
 
-- Combines Underscore’s PHP/JS files and Bootstrap’s HTML/CSS/JS.
-- Comes with Bootstrap v5 Sass source files and additional .scss files. Nicely sorted and ready to add your own variables and customize the Bootstrap variables.
-- Uses sass and postCSS to handle compiling all of the styles into one style sheet. The theme also includes rollup.js to handle javascript compilation and minification.
-- Uses a single minified CSS file for all the basic stuff.
-- [Font Awesome](http://fortawesome.github.io/Font-Awesome/) integration (v4.7.0)
-- Jetpack ready
-- WooCommerce support
-- Contact Form 7 support
-- Translation ready
+### Item 9
 
-## How to test it
+> Would it be possible to implement DAPI (or other similar APIs) in the developed solution? If so, what changes and abstractions would you propose in the different layers of the application to facilitate said integration?
 
-****
+Yes, the current architecture was built to support multiple providers, and it would be easy to add support to a new provider.
 
-## Installation
+I didn't have the time to completely implement the DAPI API, but the code contains an initial implementation of a DAPI Provider at `inc/providers/class-digimon.php`.
+
+Once a new provider is registered, it becomes available on the `homepage` (implemented using the `index.php`) named WordPress template. The user can then select the provider they want to see on the site, and the site will automatically use the correct provider to load the data, including when visiting the `/generate` and `/random` endpoints.
+
+### Item 10
+
+> The instance becomes more and more popular and starts receiving a lot of traffic generating heavy db usage. What would you do in this situation?
+
+Our implementation relies on very little code that is not "WordPress-native".
+
+By using the default WordPress functions and APIs, we can rely on the WordPress' strong ecosystem of plugins and services to help us scale the site.
+
+Examples of where this can make a difference on our case:
+
+#### Caching
+
+Instead of simply linking to the image links returned by the API, we download the images and save them on the WordPress media library. This allows us to use the WordPress' built-in image optimization features, as well as the WordPress' CDN integrations (added via plugins), to make sure the images are served as fast as possible. This also protects our site from breaking if the API goes down, as we will still have the images on our media library.
+
+Plugins such as s3-offload can be used to offload the media library to a CDN, such as AWS S3, which can help us reduce the load on our server and geo-locate the images closer to the user.
+
+#### Taxonomy, CPTs and post meta usage
+
+In that same vein, the fact that we use WordPress Custom Post Type system to save our different monsters, use the meta system to save monster data, and use the taxonomy system to save monster types, allows us to use the WordPress' built-in caching system to cache the data, as well as use plugins such as Redis Object Cache to cache the data on a Redis server.
+
+A persistent object cache can DRAMATICALLY reduce the load on an installation such as ours, as it allows us to keep data on memory-based databases, such as Redis, instead of having to query the database on every request.
+
+Whenever we needed to query the database directly (it only happened once in this project), we are manually adding that query to the object cache, so it can be cached and reused on future requests if an object cache is available (or installed later).
+
+API queries that we know won't change too frequently are also already being cached using the WordPress native transients API. This mechanism was used to cache the total number of pokemon available on the PokeAPI, for example, to prevent us from having to query the API on every /generate request.
+
+With all of those things already in place, we can easily scale our site by simply adding a persistent object cache, such as Redis, and a CDN, such as Cloudflare, Digital Ocean spaces, AWS, etc, to this installation.
 
 ## License
 
