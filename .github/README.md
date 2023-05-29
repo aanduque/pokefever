@@ -1,10 +1,38 @@
 <p align="center"><img src="https://raw.githubusercontent.com/aanduque/pokefever/main/img/logo.png" width="320" height="auto"></p>
 
-#### See: [Online Version](https://demos.understrap.com)
-
 # Pokefever
 
 Technical challenge for Fever.
+
+## Installing Locally
+
+This repository ships with a Docker setup to get you up-and-running as soon as possible.
+To setup a local environment to test this out, follow the steps below:
+
+### Clone this repository into your local machine.
+
+```git clone https://github.com/aanduque/pokefever.git```
+
+### Install composer dependencies
+
+```composer install```
+
+### Install node dependencies
+
+```yarn install```
+
+### Build the theme
+
+```yarn build```
+
+### Start the docker containers
+
+```docker-compose up -d```
+
+### You're ready
+
+You should now be able to access the site at <http://localhost:8000>
+The `admin` username is `admin` and the password is `admin`.
 
 ## Objectives
 
