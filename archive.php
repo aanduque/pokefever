@@ -7,6 +7,7 @@
 
 use function Pokefever\get_monster_attribute;
 use function Pokefever\get_monster_colors_for_card;
+use function Pokefever\get_types_for_filter;
 
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
@@ -25,16 +26,19 @@ get_header(); ?>
 				<div class="col-auto">
 					<label class="visually-hidden" for="autoSizingInputGroup">Username</label>
 					<div class="input-group">
-						<div class="input-group-text">Search</div>
+						<div class="input-group-text"><?php esc_attr_e( 'Search', 'pokefever' ); ?></div>
 						<input name="s" value="<?php echo esc_attr( sanitize_text_field( $_REQUEST['s'] ?? '' ) ); ?>" type="text" class="form-control" id="autoSizingInputGroup" placeholder="Type a name...">
 					</div>
 				</div>
 				<div class="col-auto">
 					<label class="visually-hidden" for="autoSizingSelect">Preference</label>
 					<select name="pokemon_type" class="form-select" id="autoSizingSelect">
-						<option value="" selected>Pokemon Type...</option>
-						<option value="grass">Grass</option>
-						<option value="ice">Ice</option>
+						<option value="" selected><?php esc_attr_e( 'Type...', 'pokefever' ); ?></option>
+							<?php foreach ( get_types_for_filter( 5 ) as $type => $name ) : ?>
+								<option value="<?php echo esc_attr( $type ); ?>" <?php selected( $type, $_REQUEST['pokemon_type'] ?? '' ); ?>>
+									<?php echo esc_html( $name ); ?>
+								</option>
+							<?php endforeach; ?>
 					</select>
 				</div>
 			</div>

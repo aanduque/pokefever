@@ -1,1 +1,1 @@
-<?php get_template_part( 'archive-pokemon' );
+<?php get_template_part( 'archive' );

@@ -7,6 +7,7 @@
 
 namespace Pokefever; // phpcs:ignore
 
+use Exception;
 use Pokefever\Models\Monster;
 use Pokefever\Pokefever;
 use function Pokefever\container as app;
@@ -121,6 +122,14 @@ function get_monster_colors_for_card( int $monster_id ) {
 
 }
 
+/**
+ * Get a given attribute of a monster.
+ *
+ * @param string $attribute The attribute name.
+ * @param mixed  $default A default value, if nothing else is found. Defaults to null.
+ * @param mixed  $monster_post The monster post object. Defaults to the global $post.
+ * @return mixed
+ */
 function get_monster_attribute( string $attribute, $default = null, $monster_post = null ) {
 
 	global $post;
@@ -128,5 +137,47 @@ function get_monster_attribute( string $attribute, $default = null, $monster_pos
 	$monster_post ??= $post;
 
 	return Monster::from_post( $monster_post )->attribute( $attribute, $default );
+
+}
+
+/**
+ * Get the types for the filter.
+ * 
+ * @throws Exception
+ * 
+ * @param int $types_to_return Maximum number of types to return. Defaults to 5.
+ * @return mixed 
+ */
+function get_types_for_filter( int $types_to_return = 5 ) {
+
+	$types = get_transient( "pokefever_types_$types_to_return" );
+
+	if ( $types ) {
+		return $types;
+	}
+
+	try {
+
+		$data = Util::call_api( 'https://pokeapi.co/api/v2/type', array(
+			'limit' => $types_to_return,
+		) );
+
+		$types = collect($data->results)->mapWithKeys(
+			function( $type ) {
+				return array(
+					$type->name => ucfirst($type->name),
+				);
+			}
+		)->toArray();
+		
+		set_transient( "pokefever_types_$types_to_return", $types, 1 * HOUR_IN_SECONDS );
+
+		return $types;
+
+	} catch (\Throwable $th) {
+		
+		return array();
+
+	}
 
 }

@@ -53,18 +53,20 @@ const initializeAjaxFilter = () => {
 
           mainList.innerHTML = mainListElement.innerHTML
 
-          if (parentElement) {
-            parentElement.style.transition = 'opacity 0.5s ease-in-out'
-            parentElement.classList.remove('opacity-50')
-          }
+          initializeAjaxFilter()
+
+        } else {
 
           /**
            * Focus on the element that was focused before the form was submitted.
            */
           focusedElement && document.getElementsByName(focusedElement)[0]?.focus()
 
-          initializeAjaxFilter()
+        }
 
+        if (parentElement) {
+          parentElement.style.transition = 'opacity 0.5s ease-in-out'
+          parentElement.classList.remove('opacity-50')
         }
 
       })
@@ -75,7 +77,8 @@ const initializeAjaxFilter = () => {
   })
 
 }
-// declare const pokefever: PokefeverSettings
+
+declare const pokefever: PokefeverSettings
 
 domReady(initializeAjaxFilter)
 
@@ -103,7 +106,7 @@ jQuery(($: JQueryStatic) => {
         setTimeout(() => {
           $('#oldest-pokedex-number').hide(0)
           $('#load-oldest-pokedex-number').show(0)
-        }, 3000);
+        }, 3000)
       })
 
   }

@@ -1,5 +1,5 @@
 /*!
-  * Understrap v1.2.0 (https://understrap.com)
+  * Understrap v0.0.1 (https://understrap.com)
   * Copyright 2013-2023 The Understrap Authors (https://github.com/understrap/understrap/graphs/contributors)
   * Licensed under GPL-3.0 (undefined)
   */
@@ -6812,15 +6812,17 @@
 	            if (mainListElement) {
 	                var mainList = document.getElementById('list');
 	                mainList.innerHTML = mainListElement.innerHTML;
-	                if (parentElement) {
-	                    parentElement.style.transition = 'opacity 0.5s ease-in-out';
-	                    parentElement.classList.remove('opacity-50');
-	                }
+	                initializeAjaxFilter();
+	            }
+	            else {
 	                /**
 	                 * Focus on the element that was focused before the form was submitted.
 	                 */
 	                focusedElement && ((_b = document.getElementsByName(focusedElement)[0]) === null || _b === void 0 ? void 0 : _b.focus());
-	                initializeAjaxFilter();
+	            }
+	            if (parentElement) {
+	                parentElement.style.transition = 'opacity 0.5s ease-in-out';
+	                parentElement.classList.remove('opacity-50');
 	            }
 	        })
 	            .catch(function (error) {
@@ -6828,7 +6830,6 @@
 	        });
 	    });
 	};
-	// declare const pokefever: PokefeverSettings
 	domReady(initializeAjaxFilter);
 	jQuery(function ($) {
 	    var loadOldPokedexNumber = function (event) {
