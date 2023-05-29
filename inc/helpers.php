@@ -5,10 +5,10 @@
  * @package pokefever
  */
 
-namespace pf; // phpcs:ignore
+namespace Pokefever; // phpcs:ignore
 
 use Pokefever\Pokefever;
-use function pf\container as app;
+use function Pokefever\container as app;
 use function paginate_links as wp_paginate_links;
 
 /**
@@ -17,7 +17,7 @@ use function paginate_links as wp_paginate_links;
  * @return Pokerfever
  */
 function container() {
-	return Pokefever::getInstance();
+	return Pokefever::getInstance()->get( 'app' );
 }
 
 /**
@@ -70,5 +70,52 @@ function get_registered_post_types() {
 			return $provider->post_type() ?? array();
 		}
 	)->toArray();
+
+}
+
+/**
+ * Get the registered providers' post type slugs only.
+ *
+ * @return array
+ */
+function get_registered_post_types_slugs() {
+
+	return collect( app()->get_providers() )->map(
+		function( $provider ) {
+			return $provider->post_type() ?? array();
+		}
+	)->pluck( 0 )->toArray();
+
+}
+
+/**
+ * Get the card colors for a given monster, by id.
+ *
+ * @param int $monster_id The ID of the post associated with the monster.
+ * @return string
+ */
+function get_monster_colors_for_card( int $monster_id ) {
+
+	$monster = get_post( $monster_id );
+
+	if ( ! $monster ) {
+		return '';
+	}
+
+	$primary     = get_post_meta( $monster->ID, 'primary_color', true );
+	$primary_rgb = Util::hex_to_rgb( $primary );
+
+	if ( ! $primary_rgb ) {
+		return '';
+	}
+
+	return "
+		--bs-primary: $primary;
+		--bs-primary-rgb: $primary_rgb->r,$primary_rgb->g,$primary_rgb->b;
+		--bs-link-color: $primary;
+		--bs-bg-opacity: 1;
+		--pokemon-linear-gradient-angle: 90deg;
+		--pokemon-linear-gradient: linear-gradient(var(--pokemon-linear-gradient-angle), white 0%, rgba(var(--bs-primary-rgb),0.6) 100%);
+	";
 
 }

@@ -16,9 +16,12 @@
  */
 
 use Pokefever\Features\Extra\Digimon;
+use Pokefever\Features\Required\Frontend_Customizations;
+use Pokefever\Features\Required\Generate_Endpoint;
 use Pokefever\Features\Required\Pokemon;
+use Pokefever\Features\Required\Random_Endpoint;
 use Pokefever\Features\Required\Understrap_Child;
-use function pf\container as app;
+use function Pokefever\container as app;
 
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
@@ -33,7 +36,10 @@ require_once __DIR__ . '/vendor/autoload.php';
  */
 app()->register_features(
 	array(
-		new Pokemon(), // Adds the main functionality regarding the Pokemon API.
+		Pokemon::class, // Adds the main functionality regarding the Pokemon API.
+		Generate_Endpoint::class, // Adds the /generate endpoint.
+		Random_Endpoint::class, // Adds the /random endpoint.
+		Frontend_Customizations::class, // Adds the frontend customizations.
 	)
 );
 
@@ -43,7 +49,7 @@ app()->register_features(
  */
 app()->register_features(
 	array(
-		new Digimon(), // Adds the Digimon API as an example of how to add more monster providers.
+		Digimon::class, // Adds the Digimon API as an example of how to add more monster providers.
 	)
 );
 
@@ -53,11 +59,11 @@ app()->register_features(
  */
 app()->register_features(
 	array(
-		new Understrap_Child(), // Adds the child theme logic that came with the Understrap theme.
+		Understrap_Child::class, // Adds the child theme logic that came with the Understrap theme.
 	)
 );
 
 /**
  * Initialize the theme main class.
  */
-add_action( 'after_setup_theme', array( app(), 'boot' ) );
+app()->boot();

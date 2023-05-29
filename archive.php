@@ -2,6 +2,8 @@
 
 use Pokefever\Pokefever;
 
+use function Pokefever\get_monster_colors_for_card;
+
  get_header(); ?>
 
 <?php get_template_part( 'template-parts/archive-hero' ); ?>
@@ -18,7 +20,7 @@ use Pokefever\Pokefever;
 					<label class="visually-hidden" for="autoSizingInputGroup">Username</label>
 					<div class="input-group">
 						<div class="input-group-text">Search</div>
-						<input name="s" value="<?php echo esc_attr( wp_unslash( $_REQUEST['s'] ?? '' ) ); ?>" type="text" class="form-control" id="autoSizingInputGroup" placeholder="Type a name...">
+						<input name="s" value="<?php echo esc_attr( $_REQUEST['s'] ?? '' ); ?>" type="text" class="form-control" id="autoSizingInputGroup" placeholder="Type a name...">
 					</div>
 				</div>
 				<div class="col-auto">
@@ -45,7 +47,7 @@ use Pokefever\Pokefever;
 			the_post();
 			?>
 
-		<div class="col d-flex" style="<?php echo esc_attr( Pokefever::override_card_colors( get_post_meta( get_the_ID(), 'pokemon_primary_color', true ), get_post_meta( get_the_ID(), 'pokemon_secondary_color', true ) ) ); ?>">
+		<div class="col d-flex" style="<?php echo esc_attr( get_monster_colors_for_card( get_the_ID() ) ); ?>">
 			<a href="<?php the_permalink(); ?>" class="card border flex-fill text-decoration-none text-dark" style="background: var(--pokemon-linear-gradient)">
 				<div class="row g-0">
 					<div class="col-8 my-auto">

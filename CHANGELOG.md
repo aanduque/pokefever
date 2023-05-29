@@ -39,6 +39,11 @@ Fontes:
 - <https://www.loom.com/share/8047f8eb55b0423f9e87282565d9ce3f>
 - <https://www.loom.com/share/d67d48b05a1a4c2f98a78e7cba07f44c>
 - <https://www.loom.com/share/cb6eb162e17f454caefc0f0bdfe9a501>
+- <https://www.loom.com/share/9a9a3320f7724133bbaabef4502f6475>
+- <https://www.loom.com/share/1ade6047c495494b9295bde2a6cbd723>
+- <https://www.loom.com/share/822e34e8f53e4fd0bfe0a420297422b0>
+- <https://www.loom.com/share/133a3a70bf78436f912c76af24b3ba9f>
+- <https://www.loom.com/share/ee2034ab365c4727934008ec0952a3cd>
 
 So, the plan for refactoring is not really that complicated.
 Right now, all of our logic is pretty much concentrated on the class-pokefever.php class.

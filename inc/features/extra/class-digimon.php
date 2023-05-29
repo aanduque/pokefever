@@ -19,7 +19,7 @@ class Digimon implements Extra_Feature {
 		/**
 		 * Registers the Digimon monster provider.
 		 */
-		$app->register_provider( 'digimon', new Digimon_Provider() );
+		$app->register_provider( 'digimon', Digimon_Provider::class );
 
 	}
 

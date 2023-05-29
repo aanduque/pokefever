@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @see inc/helpers.php
  */
-use function pf\paginate_links;
+use function Pokefever\paginate_links;
 
 echo paginate_links(
 	array(

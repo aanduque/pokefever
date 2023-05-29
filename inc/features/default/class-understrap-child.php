@@ -49,15 +49,16 @@ class Understrap_Child implements Feature {
 
 		$css_version = $theme_version . '.' . filemtime( get_stylesheet_directory() . $theme_styles );
 
-		wp_enqueue_style( 'child-understrap-styles', get_stylesheet_directory_uri() . $theme_styles, array(), $css_version );
+		wp_enqueue_style( 'pokefever-styles', get_stylesheet_directory_uri() . $theme_styles, array(), $css_version );
+
 		wp_enqueue_script( 'jquery' );
 
 		$js_version = $theme_version . '.' . filemtime( get_stylesheet_directory() . $theme_scripts );
 
-		wp_register_script( 'child-understrap-scripts', get_stylesheet_directory_uri() . $theme_scripts, array(), $js_version, true );
+		wp_register_script( 'pokefever-scripts', get_stylesheet_directory_uri() . $theme_scripts, array(), $js_version, true );
 
 		wp_localize_script(
-			'child-understrap-scripts',
+			'pokefever-scripts',
 			'pokefever',
 			array(
 				'ajax_url'        => admin_url( 'admin-ajax.php' ),
@@ -71,7 +72,7 @@ class Understrap_Child implements Feature {
 			)
 		);
 
-		wp_enqueue_script( 'child-understrap-scripts' );
+		wp_enqueue_script( 'pokefever-scripts' );
 
 		if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 			wp_enqueue_script( 'comment-reply' );

@@ -15,11 +15,11 @@ use Pokefever\Models\Monster;
  */
 class Digimon implements Monster_Provider {
 
-	public function name() {
+	public function name() : string {
 		return __( 'Digimon', 'pokefever' );
 	}
 
-	public function description() {
+	public function description() : string {
 		return __( 'Digimon are creatures that inhabit the Digital World, a virtual space created by humanity\'s various communication networks and their developers.', 'pokefever' );
 	}
 

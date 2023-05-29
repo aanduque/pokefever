@@ -28,3 +28,29 @@
     filter: grayscale(100%);
   }
 }
+
+body {
+  min-height: 100vh;
+  position: relative;
+  background: var(--pokemon-linear-gradient);
+}
+
+body::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  background-image: var(--pokefever-provider-bg-decoration);
+  background-repeat: no-repeat;
+  background-position: top right;
+  opacity: 0.08;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+}
+
+.site {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

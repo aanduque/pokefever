@@ -48,7 +48,7 @@
 		<properties>
 			<!-- Value: replace the function, class, and variable prefixes used. Separate multiple
 			prefixes with a comma. -->
-			<property name="prefixes" type="array" value="pokefever,pf,pf_,Pokefever" />
+			<property name="prefixes" type="array" value="pokefever,pf_,Pokefever" />
 		</properties>
 		<exclude-pattern>tests/*</exclude-pattern>
 	</rule>
@@ -98,6 +98,7 @@
 				<element value="understrap_get_screen_reader_class" />
 				<element value="get_the_post_type_description" />
 				<element value="paginate_links" />
+				<element value="get_error_message" />
 			</property>
 		</properties>
 	</rule>

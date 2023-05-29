@@ -1,6 +1,6 @@
 <?php
 
-use function pf\container as app;
+use function Pokefever\container as app;
 
 it(
 	'can register the default provider',
