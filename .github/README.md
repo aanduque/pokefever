@@ -16,23 +16,34 @@ To setup a local environment to test this out, follow the steps below:
 
 #### Clone this repository into your local machine.
 
-```git clone https://github.com/aanduque/pokefever.git```
+```bash
+git clone https://github.com/aanduque/pokefever.git
+cd pokefever
+```
 
 #### Install composer dependencies
 
-```composer install```
+```bash
+composer install
+```
 
 #### Install node dependencies
 
-```yarn install```
+```bash
+yarn install
+```
 
 #### Build the theme
 
-```yarn build```
+```bash
+yarn build
+```
 
 #### Start the docker containers
 
-```docker-compose up -d```
+```bash
+docker-compose up -d
+```
 
 #### You're ready
 
