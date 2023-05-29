@@ -193,6 +193,19 @@ You can find the recordings here (I should have done a better job of naming the 
 - <https://www.loom.com/share/133a3a70bf78436f912c76af24b3ba9f>
 - <https://www.loom.com/share/ee2034ab365c4727934008ec0952a3cd>
 
+## Testing
+
+I wish I had more time to write tests for this project, but I was already running out of time.
+
+I made the decision of not using TDD on this project, as it usually does not work that well with WordPress (as the bootstrap process is very slow, which makes the red-green-refactor cycle very slow as well).
+
+I did setup PHPUnit, later replacing it with Pest, which I much prefer.
+
+If I had more time, I would definitively write more tests, focusing on the following, if total coverage was not possible:
+
+- Test the registered endpoint responses, as well as possible errors;
+- Test the generate methods of the providers (although, I'm not sure if it would make sense to mock it, as what we really want to test is the actual API response);
+
 ## License
 
 Copyright 2023 [Arindo Duque](https://arindoduque.com).
