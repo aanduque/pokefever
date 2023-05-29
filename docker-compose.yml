@@ -36,7 +36,7 @@ services:
       - "wordpress"
     entrypoint: |
       sh -c "
-        echo "Wait for 20 seconds before attempting to install..."
+        echo 'Wait for 20 seconds before attempting to install...'
         sleep 20 ;
         docker exec -t pokefever wp core install --path=/var/www/html --url='http://localhost:8000' --title='Pokefever' --admin_user=admin --admin_password=admin --admin_email='admin@example.com' --allow-root ; 
         docker exec -t pokefever wp theme install understrap --allow-root ; 
